@@ -10,13 +10,13 @@ This project takes an input string, tokenises the string into a slice of tokens,
 
 - :white_check_mark: Tokeniser
 - :white_check_mark: Parser
-- :white_check_mark: Full suppport of the 8080 instruction set (244 instructions)
+- :white_check_mark: Comment support
+- :white_check_mark: Supports all 244 instructions on the 8080 cpu
 
 # TODO 
 
-- Labels
-- Comments
-- Data (define byte, word, storage)
+- Label support
+- Data support (define byte, word, storage)
 - Input from STDIN
 
 # Usage

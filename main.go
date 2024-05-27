@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/lukepeterson/go8080assembler/assembler"
 )
@@ -15,7 +16,10 @@ func main() {
 	`
 
 	assembler := &assembler.Assembler{}
-	assembler.Assemble(code)
+	err := assembler.Assemble(code)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for _, instruction := range assembler.ByteCode {
 		fmt.Printf("%02X ", instruction)

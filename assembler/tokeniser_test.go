@@ -7,9 +7,10 @@ import (
 
 func TestTokenise(t *testing.T) {
 	tests := []struct {
-		name string
-		code string
-		want []string
+		name    string
+		code    string
+		want    []string
+		wantErr bool
 	}{
 		{
 			name: "case sensitivity",
@@ -52,16 +53,20 @@ func TestTokenise(t *testing.T) {
 			want: []string{"MOV B,C"},
 		},
 		{
-			name: "invalid instruction",
-			code: "FOO",
-			want: nil,
+			name:    "invalid instruction",
+			code:    "MOVE",
+			want:    nil,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, _ := tokenise(tt.code)
+			got, err := tokenise(tt.code)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Tokenise() error = %v, expectErr %v", err, tt.wantErr)
+			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("tokenise() got %q, want %q", got, tt.want)
+				t.Errorf("Tokenise() got %q, want %q", got, tt.want)
 			}
 		})
 	}

@@ -10,37 +10,49 @@ func TestAssemblerParseLine(t *testing.T) {
 		name      string
 		line      string
 		wantBytes []byte
-		wantError bool
+		wantErr   bool
 	}{
 		{
 			name:      "single byte instruction without comma",
 			line:      "HLT",
 			wantBytes: []byte{0x76},
-			wantError: false,
+			wantErr:   false,
 		},
 		{
 			name:      "single byte instruction with comma",
 			line:      "MOV B, B",
 			wantBytes: []byte{0x40},
-			wantError: false,
+			wantErr:   false,
 		},
 		{
 			name:      "two byte instruction",
 			line:      "MVI B, 55H",
 			wantBytes: []byte{0x06, 0x55},
-			wantError: false,
+			wantErr:   false,
+		},
+		{
+			name:      "two byte instruction with missing operand",
+			line:      "MVI B",
+			wantBytes: nil,
+			wantErr:   true,
+		},
+		{
+			name:      "three byte instruction with missing operand",
+			line:      "JNZ",
+			wantBytes: nil,
+			wantErr:   true,
 		},
 		{
 			name:      "three byte instruction with explicit high byte",
 			line:      "LDA 1234H",
 			wantBytes: []byte{0x3A, 0x34, 0x12},
-			wantError: false,
+			wantErr:   false,
 		},
 		{
 			name:      "three byte instruction with implicit high byte",
 			line:      "LDA 34H",
 			wantBytes: []byte{0x3A, 0x34, 0x00},
-			wantError: false,
+			wantErr:   false,
 		},
 	}
 
@@ -48,8 +60,8 @@ func TestAssemblerParseLine(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			a := &Assembler{}
 			err := a.parseLine(tt.line)
-			if (err != nil) != tt.wantError {
-				t.Errorf("Assembler.parseLine() error = %v, wantErr %v", err, tt.wantError)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Assembler.parseLine() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(a.ByteCode, tt.wantBytes) {
@@ -170,9 +182,50 @@ func TestAssemblerAssemble(t *testing.T) {
 		wantErr      bool
 	}{
 		{
-			name:         "single line code",
+			name:         "single line of code",
 			code:         `MOV B, M`,
 			wantByteCode: []byte{0x46},
+			wantErr:      false,
+		},
+		{
+			name:         "empty code",
+			code:         "",
+			wantByteCode: nil,
+			wantErr:      false,
+		},
+		{
+			name:         "whitespace only",
+			code:         "    ",
+			wantByteCode: nil,
+			wantErr:      false,
+		},
+		{
+			name:         "invalid opcode",
+			code:         "FOO",
+			wantByteCode: nil,
+			wantErr:      true,
+		},
+		{
+			name:         "single line with comment",
+			code:         "MVI A, 34h ;Load immediate value",
+			wantByteCode: []byte{0x3E, 0x34},
+			wantErr:      false,
+		},
+		{
+			name:         "single line with comment and no instruction",
+			code:         " ; Do nothing",
+			wantByteCode: nil,
+			wantErr:      false,
+		},
+		{
+			name: "multiple lines with comments",
+			code: `
+				MVI A, 34h ;Load immediate value
+				           ;This is a comment on an empty line
+				MOV B, C   ;Move C to B
+				HLT        ;Halt
+			`,
+			wantByteCode: []byte{0x3E, 0x34, 0x41, 0x76},
 			wantErr:      false,
 		},
 		{

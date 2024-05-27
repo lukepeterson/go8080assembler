@@ -17,6 +17,15 @@ type Assembler struct {
 // - converts all two and three byte operands to little endian (low byte first)
 // - updates the ByteCode field with converted values
 func (a *Assembler) parseLine(line string) error {
+
+	// Remove comments
+	index := strings.Index(line, ";")
+	if index != -1 {
+		line = line[:index]
+	}
+
+	// Trim the line to remove leading and trailing whitespace
+	// If the line is empty after trimming, return nil to skip processing
 	line = strings.TrimSpace(line)
 	if line == "" {
 		return nil
@@ -37,15 +46,22 @@ func (a *Assembler) parseLine(line string) error {
 	case 1: // Single byte, so return the opcode and carry on
 		a.ByteCode = append(a.ByteCode, instruction.Opcode)
 	case 2: // Two bytes (a word), so return the opcode and the next instruction converted to uint8
+		if len(tokens) < 2 {
+			return fmt.Errorf("missing operand for instruction: %v", tokens[0])
+		}
+
 		// parseHex returns two bytes, so we can ignore the first
 		_, lowByte, err := parseHex(tokens[1])
 		if err != nil {
 			return err
 		}
 
-		a.ByteCode = append(a.ByteCode, instruction.Opcode)
-		a.ByteCode = append(a.ByteCode, byte(lowByte))
-	case 3: // Three bytes, so return the opcode and the next instruciton converted to two uint8s
+		a.ByteCode = append(a.ByteCode, instruction.Opcode, byte(lowByte))
+	case 3: // Three bytes, so return the opcode and the next instruction converted to two uint8s
+		if len(tokens) < 2 {
+			return fmt.Errorf("missing operand for instruction: %v", tokens[0])
+		}
+
 		highByte, lowByte, err := parseHex(tokens[1])
 		if err != nil {
 			return err
@@ -54,9 +70,9 @@ func (a *Assembler) parseLine(line string) error {
 		// Split the 16-bit int into high and low order bytes
 		// The 8080 CPU is little endian, so we need to split the bytes
 		// and return the low order byte first.
-		a.ByteCode = append(a.ByteCode, instruction.Opcode)
-		a.ByteCode = append(a.ByteCode, byte(lowByte))
-		a.ByteCode = append(a.ByteCode, byte(highByte))
+		a.ByteCode = append(a.ByteCode, instruction.Opcode, byte(lowByte), byte(highByte))
+	default:
+		return fmt.Errorf("invalid instruction length for: %v", tokens[0])
 	}
 
 	return nil
@@ -87,7 +103,7 @@ func (a *Assembler) Assemble(code string) error {
 	for _, line := range lines {
 		err := a.parseLine(line)
 		if err != nil {
-			return nil
+			return err
 		}
 	}
 
