@@ -2,32 +2,94 @@ package assembler
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
 type Assembler struct {
+	ByteCode []byte
 }
 
-func parseLine(line string) []byte {
-
+// parseLine takes an input string, and then performs a number of operations:
+// - trims all empty lines
+// - passes each string to tokenise()
+// - converts each instruction to its corresponding opcode byte
+// - converts all two and three byte operands to little endian (low byte first)
+// - updates the ByteCode field with converted values
+func (a *Assembler) parseLine(line string) error {
 	line = strings.TrimSpace(line)
 	if line == "" {
 		return nil
 	}
 
-	tokens, _ := tokenise(line)
-	for i, token := range tokens {
-		fmt.Printf("token %d: %#v\n", i, token)
+	tokens, err := tokenise(line)
+	if err != nil {
+		return err
 	}
 
-	return []byte{}
+	// Check the first token in the list for a matching instruction
+	instruction, exists := instructionSet[tokens[0]]
+	if !exists {
+		return fmt.Errorf("unknown instruction: %v", tokens[0])
+	}
+
+	switch instruction.Length {
+	case 1: // Single byte, so return the opcode and carry on
+		a.ByteCode = append(a.ByteCode, instruction.Opcode)
+	case 2: // Two bytes (a word), so return the opcode and the next instruction converted to uint8
+		// parseHex returns two bytes, so we can ignore the first
+		_, lowByte, err := parseHex(tokens[1])
+		if err != nil {
+			return err
+		}
+
+		a.ByteCode = append(a.ByteCode, instruction.Opcode)
+		a.ByteCode = append(a.ByteCode, byte(lowByte))
+	case 3: // Three bytes, so return the opcode and the next instruciton converted to two uint8s
+		highByte, lowByte, err := parseHex(tokens[1])
+		if err != nil {
+			return err
+		}
+
+		// Split the 16-bit int into high and low order bytes
+		// The 8080 CPU is little endian, so we need to split the bytes
+		// and return the low order byte first.
+		a.ByteCode = append(a.ByteCode, instruction.Opcode)
+		a.ByteCode = append(a.ByteCode, byte(lowByte))
+		a.ByteCode = append(a.ByteCode, byte(highByte))
+	}
+
+	return nil
 }
 
-func (a *Assembler) Assemble(code string) []byte {
-	lines := strings.Split(code, "\n")
-	for _, line := range lines {
-		parseLine(line)
+// parseHex takes a string with an H suffix or 0x prefix and parses it into a 16 bit integer,
+// returning the result as two int8s.  This has a nice side effect of being able to take
+// a one byte string and also returning the result as two 8bit integers, which is
+// required for our 2 byte instructions.  For example: "4AH" -> 0x00, 0x4A
+func parseHex(token string) (uint8, uint8, error) {
+	token = strings.TrimSuffix(token, "H")
+	token = strings.TrimPrefix(token, "0x")
+	hex, err := strconv.ParseInt(token, 16, 16)
+	if err != nil {
+		return 0, 0, err
 	}
 
-	return []byte{0xFF}
+	highByte := uint8(hex >> 8)
+	lowByte := uint8(hex & 0x00FF)
+
+	return highByte, lowByte, nil
+}
+
+// Assemble takes a newline separated string of code, parses the input into tokens,
+// and then converts each instruction to a valid opcode from the instructionSet.
+func (a *Assembler) Assemble(code string) error {
+	lines := strings.Split(code, "\n")
+	for _, line := range lines {
+		err := a.parseLine(line)
+		if err != nil {
+			return nil
+		}
+	}
+
+	return nil
 }

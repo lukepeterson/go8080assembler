@@ -22,7 +22,7 @@ func TestTokenise(t *testing.T) {
 			want: []string{"HLT"},
 		},
 		{
-			name: "single byte instruction with spaces",
+			name: "single byte instruction with space",
 			code: "  HLT  ",
 			want: []string{"HLT"},
 		},
@@ -56,10 +56,6 @@ func TestTokenise(t *testing.T) {
 			code: "FOO",
 			want: nil,
 		},
-
-		// TODO
-		// Test for length of results based on opcodes
-		// Proper test for errors being returned
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
