@@ -48,6 +48,12 @@ func normalise(line string) string {
 func extractOpcodeAndOperand(line string) (string, string, error) {
 	for opcode := range instructionSet {
 		if strings.HasPrefix(line, opcode) {
+			// If we've found a match, we need to check that we haven't incorrectly mactched
+			// "IN" against "INR".  If there's a letter after "IN", keep searching.
+			if len(line) > len(opcode) && line[len(opcode)] != ' ' && line[len(opcode)] != ',' {
+				continue
+			}
+
 			remaining := strings.TrimSpace(strings.TrimPrefix(line, opcode))
 			operand := strings.TrimPrefix(remaining, ",")
 			return opcode, operand, nil

@@ -49,7 +49,6 @@ func (a *Assembler) parseLine(line string) error {
 		if len(tokens) < 2 {
 			return fmt.Errorf("missing operand for instruction: %v", tokens[0])
 		}
-
 		// parseHex returns two bytes, so we can ignore the first
 		_, lowByte, err := parseHex(tokens[1])
 		if err != nil {
@@ -59,7 +58,7 @@ func (a *Assembler) parseLine(line string) error {
 		a.ByteCode = append(a.ByteCode, instruction.Opcode, byte(lowByte))
 	case 3: // Three bytes, so return the opcode and the next instruction converted to two uint8s
 		if len(tokens) < 2 {
-			return fmt.Errorf("missing operand for instruction: %v", tokens[0])
+			return fmt.Errorf("missing operands for instruction: %v", tokens[0])
 		}
 
 		highByte, lowByte, err := parseHex(tokens[1])

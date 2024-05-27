@@ -7,52 +7,52 @@ import (
 
 func TestAssemblerParseLine(t *testing.T) {
 	tests := []struct {
-		name      string
-		line      string
-		wantBytes []byte
-		wantErr   bool
+		name         string
+		line         string
+		wantByteCode []byte
+		wantErr      bool
 	}{
 		{
-			name:      "single byte instruction without comma",
-			line:      "HLT",
-			wantBytes: []byte{0x76},
-			wantErr:   false,
+			name:         "single byte instruction without comma",
+			line:         "HLT",
+			wantByteCode: []byte{0x76},
+			wantErr:      false,
 		},
 		{
-			name:      "single byte instruction with comma",
-			line:      "MOV B, B",
-			wantBytes: []byte{0x40},
-			wantErr:   false,
+			name:         "single byte instruction with comma",
+			line:         "MOV B, B",
+			wantByteCode: []byte{0x40},
+			wantErr:      false,
 		},
 		{
-			name:      "two byte instruction",
-			line:      "MVI B, 55H",
-			wantBytes: []byte{0x06, 0x55},
-			wantErr:   false,
+			name:         "two byte instruction",
+			line:         "MVI B, 55H",
+			wantByteCode: []byte{0x06, 0x55},
+			wantErr:      false,
 		},
 		{
-			name:      "two byte instruction with missing operand",
-			line:      "MVI B",
-			wantBytes: nil,
-			wantErr:   true,
+			name:         "two byte instruction with missing operand",
+			line:         "MVI B",
+			wantByteCode: nil,
+			wantErr:      true,
 		},
 		{
-			name:      "three byte instruction with missing operand",
-			line:      "JNZ",
-			wantBytes: nil,
-			wantErr:   true,
+			name:         "three byte instruction with missing operand",
+			line:         "JNZ",
+			wantByteCode: nil,
+			wantErr:      true,
 		},
 		{
-			name:      "three byte instruction with explicit high byte",
-			line:      "LDA 1234H",
-			wantBytes: []byte{0x3A, 0x34, 0x12},
-			wantErr:   false,
+			name:         "three byte instruction with explicit high byte",
+			line:         "LDA 1234H",
+			wantByteCode: []byte{0x3A, 0x34, 0x12},
+			wantErr:      false,
 		},
 		{
-			name:      "three byte instruction with implicit high byte",
-			line:      "LDA 34H",
-			wantBytes: []byte{0x3A, 0x34, 0x00},
-			wantErr:   false,
+			name:         "three byte instruction with implicit high byte",
+			line:         "LDA 34H",
+			wantByteCode: []byte{0x3A, 0x34, 0x00},
+			wantErr:      false,
 		},
 	}
 
@@ -64,8 +64,8 @@ func TestAssemblerParseLine(t *testing.T) {
 				t.Errorf("Assembler.parseLine() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(a.ByteCode, tt.wantBytes) {
-				t.Errorf("Assembler.parseLine() = 0x%02X, want 0x%02X", a.ByteCode, tt.wantBytes)
+			if !reflect.DeepEqual(a.ByteCode, tt.wantByteCode) {
+				t.Errorf("Assembler.parseLine() ByteCode = 0x%02X, wantByteCode 0x%02X", a.ByteCode, tt.wantByteCode)
 			}
 		})
 	}
@@ -218,13 +218,40 @@ func TestAssemblerAssemble(t *testing.T) {
 			wantErr:      false,
 		},
 		{
+			name:         "correct decoding of INR A",
+			code:         "INR A",
+			wantByteCode: []byte{0x3C},
+			wantErr:      false,
+		},
+		{
+			name: "correct decoding of INR A, avoiding collision with IN",
+			code: `
+				INR A
+				IN 44H`,
+			wantByteCode: []byte{0x3C, 0xDB, 0x44},
+			wantErr:      false,
+		},
+		{
+			name:         "correct decoding of IN",
+			code:         "IN 33H",
+			wantByteCode: []byte{0xDB, 0x33},
+			wantErr:      false,
+		},
+		{
+			name: "correct decoding of IN, avoiding collision with INR A",
+			code: `
+				IN 33H
+				INR A`,
+			wantByteCode: []byte{0xDB, 0x33, 0x3C},
+			wantErr:      false,
+		},
+		{
 			name: "multiple lines with comments",
 			code: `
 				MVI A, 34h ;Load immediate value
 				           ;This is a comment on an empty line
 				MOV B, C   ;Move C to B
-				HLT        ;Halt
-			`,
+				HLT        ;Halt`,
 			wantByteCode: []byte{0x3E, 0x34, 0x41, 0x76},
 			wantErr:      false,
 		},
@@ -244,7 +271,6 @@ func TestAssemblerAssemble(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			a := &Assembler{}
 			err := a.Assemble(tt.code)
-
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Assembler.Assemble() error = %v, wantErr %v", err, tt.wantErr)
 			}

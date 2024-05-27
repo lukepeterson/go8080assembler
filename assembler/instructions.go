@@ -295,7 +295,7 @@ var instructionSet = map[string]Instruction{
 	"DAA": {Opcode: 0x27, Length: 1},
 
 	// INPUT/OUTPUT
-	"IN":  {Opcode: 0xD8, Length: 2},
+	"IN":  {Opcode: 0xDB, Length: 2},
 	"OUT": {Opcode: 0xD3, Length: 2},
 
 	// CONTROL
