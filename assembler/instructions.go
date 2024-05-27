@@ -1,15 +1,14 @@
 package assembler
 
+// Instruction stores a single instruction, made up of a one byte Opcode and an instruction length.
 type Instruction struct {
 	Opcode byte
 	Length int
 }
 
-// Grouped by instruction set group as per "Table 2. Instruction Set Summary",
-// in the Intel 8080A 8-BIT N-CHANNEL MICROPROCESSOR datasheet.
+// Grouped by instruction set group as per "Table 2. Instruction Set Summary", in the Intel 8080A 8-BIT N-CHANNEL MICROPROCESSOR datasheet.
 // Opcode = the 1 byte hexadecimal representation of the instruction for the 8080
-// Length = how many bytes in total the instruction has (more succintly, how many n-1 bytes _after_
-// the opcode to interpret as the operand)
+// Length = how many bytes in total the instruction has (more succintly, how many n-1 bytes _after_ the opcode to interpret as the operand)
 var instructionSet = map[string]Instruction{
 	// MOVE, LOAD AND STORE
 	"MOV A,B": {Opcode: 0x78, Length: 1},

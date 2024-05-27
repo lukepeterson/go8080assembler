@@ -5,11 +5,7 @@ import (
 	"strings"
 )
 
-// tokenise takes a line of code as an input, removes extra spacing/commas,
-// and then returns the opcode and operands as separate strings.  The most
-// important feature of this function is the ability to distinguish between
-// single and multi-byte instructions and treat them as one.  For example:
-// "MOV B, B" (one byte) and "MVI B" (two bytes).
+// tokenise takes a line of code as an input, removes extra spacing/commas, and then returns the opcode and operands as separate strings.  This function can also distinguish between single and multi-byte instructions and treat them as one.  For example: "MOV B, B" (one byte) and "MVI B" (two bytes).
 func tokenise(line string) ([]string, error) {
 	line = normalise(line)
 
@@ -28,8 +24,7 @@ func tokenise(line string) ([]string, error) {
 	return tokens, nil
 }
 
-// normalise takes an input string, converts it to upper case, strips out extra spaces,
-// and makes all comma formatting consistent, helping us match against out opcode map.
+// normalise takes an input string, converts it to upper case, strips out extra spaces, and makes all comma formatting consistent, helping us match against out opcode map.
 func normalise(line string) string {
 	line = strings.ToUpper(line)
 

@@ -1,3 +1,4 @@
+// Package assembler provides functions for assembling Intel 8080 CPU assembler commands.
 package assembler
 
 import (
@@ -6,6 +7,7 @@ import (
 	"strings"
 )
 
+// Assembler stores our assembled bytecode
 type Assembler struct {
 	ByteCode []byte
 }
@@ -77,10 +79,7 @@ func (a *Assembler) parseLine(line string) error {
 	return nil
 }
 
-// parseHex takes a string with an H suffix or 0x prefix and parses it into a 16 bit integer,
-// returning the result as two int8s.  This has a nice side effect of being able to take
-// a one byte string and also returning the result as two 8bit integers, which is
-// required for our 2 byte instructions.  For example: "4AH" -> 0x00, 0x4A
+// parseHex takes a string with an H suffix or 0x prefix and parses it into a 16 bit integer, returning the result as two int8s.  This has a nice side effect of being able to take a one byte string and also returning the result as two 8bit integers, which is required for our 2 byte instructions.  For example: "4AH" -> 0x00, 0x4A
 func parseHex(token string) (uint8, uint8, error) {
 	token = strings.TrimSuffix(token, "H")
 	token = strings.TrimPrefix(token, "0x")
@@ -95,8 +94,7 @@ func parseHex(token string) (uint8, uint8, error) {
 	return highByte, lowByte, nil
 }
 
-// Assemble takes a newline separated string of code, parses the input into tokens,
-// and then converts each instruction to a valid opcode from the instructionSet.
+// Assemble takes a newline separated string of code, parses the input into tokens, and then converts each instruction to a valid opcode from the instructionSet.
 func (a *Assembler) Assemble(code string) error {
 	lines := strings.Split(code, "\n")
 	for _, line := range lines {

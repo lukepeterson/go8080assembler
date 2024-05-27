@@ -5,6 +5,7 @@ What good is [an 8080 CPU emulator](https://github.com/lukepeterson/go8080cpu) w
 This project takes an input string, tokenises the string into a slice of tokens, then parses those tokens, converting each to a valid 8080 opcode.
 
 [![Tests](https://github.com/lukepeterson/go8080assembler/actions/workflows/go.yml/badge.svg)](https://github.com/lukepeterson/go8080assembler/actions/workflows/go.yml)
+![Go Report Card](https://goreportcard.com/badge/github.com/lukepeterson/go8080assembler)
 
 # Features
 
