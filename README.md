@@ -6,6 +6,7 @@ This project takes an input string, tokenises the string into a slice of tokens,
 
 [![Tests](https://github.com/lukepeterson/go8080assembler/actions/workflows/go.yml/badge.svg)](https://github.com/lukepeterson/go8080assembler/actions/workflows/go.yml)
 ![Go Report Card](https://goreportcard.com/badge/github.com/lukepeterson/go8080assembler)
+![GitHub release](https://img.shields.io/github/v/release/lukepeterson/go8080assembler)
 
 # Features
 
