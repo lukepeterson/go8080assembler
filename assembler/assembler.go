@@ -79,12 +79,12 @@ func (a *Assembler) parseLine(line string) error {
 	return nil
 }
 
-// parseHex takes a string with an H suffix or 0x prefix and parses it into a 16 bit integer, returning the result as two int8s.  This has a nice side effect of being able to take a one byte string and also returning the result as two 8bit integers, which is required for our 2 byte instructions.  For example: "4AH" -> 0x00, 0x4A
+// parseHex takes a string with an H suffix or 0x prefix and parses it into a 16 bit integer, returning the result as two int8s.  This has a nice side effect of being able to take a one byte string and also returning the result as two 8bit integers, which is required for our two byte instructions.  For example: "4AH" -> 0x00, 0x4A.
 func parseHex(token string) (uint8, uint8, error) {
 	token = strings.TrimSuffix(token, "H")
 	token = strings.TrimPrefix(token, "0X")
 	token = strings.TrimPrefix(token, "0x")
-	hex, err := strconv.ParseInt(token, 16, 16)
+	hex, err := strconv.ParseUint(token, 16, 16)
 	if err != nil {
 		return 0, 0, err
 	}

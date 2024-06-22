@@ -156,6 +156,13 @@ func TestAssemblerParseHex(t *testing.T) {
 			wantLow:  0xB9,
 			wantErr:  false,
 		},
+		{
+			name:     "two bytes at end of 16 bit address space (65,535 bytes)",
+			token:    "0xFFFF",
+			wantHigh: 0xFF,
+			wantLow:  0xFF,
+			wantErr:  false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -248,7 +255,7 @@ func TestAssemblerAssemble(t *testing.T) {
 		{
 			name: "multiple lines with comments",
 			code: `
-				MVI A, 34h ;Load immediate value
+				MVI A, 34H ;Load immediate value
 				           ;This is a comment on an empty line
 				MOV B, C   ;Move C to B
 				HLT        ;Halt`,
@@ -258,12 +265,21 @@ func TestAssemblerAssemble(t *testing.T) {
 		{
 			name: "multi line code",
 			code: `
-				MVI A, 34h
+				MVI A, 34H
 				MOV B, C
-				LDA 1234h
+				LDA 1234H
 				HLT
 			`,
 			wantByteCode: []byte{0x3E, 0x34, 0x41, 0x3A, 0x34, 0x12, 0x76},
+			wantErr:      false,
+		},
+		{
+			name: "end of address space",
+			code: `
+				LXI H, FFFFH
+				HLT
+			`,
+			wantByteCode: []byte{0x21, 0xFF, 0xFF, 0x76},
 			wantErr:      false,
 		},
 	}
