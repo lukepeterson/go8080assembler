@@ -24,7 +24,7 @@ func tokenise(line string) ([]string, error) {
 	return tokens, nil
 }
 
-// normalise takes an input string, converts it to upper case, strips out extra spaces, and makes all comma formatting consistent, helping us match against out opcode map.
+// normalise takes an input string, converts it to upper case, strips out extra spaces, and makes all comma formatting consistent, helping us match against our opcode map.
 func normalise(line string) string {
 	line = strings.ToUpper(line)
 
