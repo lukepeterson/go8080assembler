@@ -163,6 +163,20 @@ func TestAssemblerParseHex(t *testing.T) {
 			wantLow:  0xFF,
 			wantErr:  false,
 		},
+		{
+			name:     "three bytes with prefix and without leading zero",
+			token:    "0xFFFFF",
+			wantHigh: 0x00,
+			wantLow:  0x00,
+			wantErr:  true,
+		},
+		{
+			name:     "three bytes",
+			token:    "0xFFFFFF",
+			wantHigh: 0x00,
+			wantLow:  0x00,
+			wantErr:  true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
