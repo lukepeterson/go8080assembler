@@ -1,6 +1,6 @@
 # Intel 8080 CPU assembler in Go
 
-What good is [an 8080 CPU emulator](https://github.com/lukepeterson/go8080cpu) without an assembler?  
+What good is [an 8080 CPU emulator](https://github.com/lukepeterson/go8080cpu) without an assembler?
 
 This project takes an input string, tokenises the string into a slice of tokens, then parses those tokens, converting each to a valid 8080 opcode.
 
@@ -15,11 +15,12 @@ This project takes an input string, tokenises the string into a slice of tokens,
 - :white_check_mark: Comment support
 - :white_check_mark: Supports all 244 instructions on the 8080 cpu
 
-# TODO 
+# TODO
 
 - Label support
 - Data support (define byte, word, storage)
 - Input from STDIN
+- Find a more robust way to deal with mixed case inputs (`0x` vs `0X` which are both valid prefixes)
 
 # Usage
 
