@@ -1,6 +1,6 @@
 package assembler
 
-// Instruction stores a single instruction, made up of a one byte Opcode and an instruction length.
+// Instruction stores a single instruction, made up of a one byte opcode and an instruction length.
 type Instruction struct {
 	Opcode byte
 	Length int
