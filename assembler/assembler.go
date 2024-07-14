@@ -12,6 +12,10 @@ type Assembler struct {
 	ByteCode []byte
 }
 
+func New() *Assembler {
+	return &Assembler{}
+}
+
 // parseLine takes an input string, and then performs a number of operations:
 // - trims all empty lines
 // - passes each string to tokenise()

@@ -7,8 +7,8 @@ type Instruction struct {
 }
 
 // Grouped by instruction set group as per "Table 2. Instruction Set Summary", in the Intel 8080A 8-BIT N-CHANNEL MICROPROCESSOR datasheet.
-// Opcode = the 1 byte hexadecimal representation of the instruction for the 8080
-// Length = how many bytes in total the instruction has (more succintly, how many n-1 bytes _after_ the opcode to interpret as the operand)
+// Opcode - the one byte hexadecimal representation of the instruction for the 8080
+// Length - how many bytes in total the instruction has
 var instructionSet = map[string]Instruction{
 	// MOVE, LOAD AND STORE
 	"MOV A,B": {Opcode: 0x78, Length: 1},
@@ -19,7 +19,6 @@ var instructionSet = map[string]Instruction{
 	"MOV A,L": {Opcode: 0x7D, Length: 1},
 	"MOV A,M": {Opcode: 0x7E, Length: 1},
 	"MOV A,A": {Opcode: 0x7F, Length: 1},
-
 	"MOV B,B": {Opcode: 0x40, Length: 1},
 	"MOV B,C": {Opcode: 0x41, Length: 1},
 	"MOV B,D": {Opcode: 0x42, Length: 1},
@@ -28,7 +27,6 @@ var instructionSet = map[string]Instruction{
 	"MOV B,L": {Opcode: 0x45, Length: 1},
 	"MOV B,M": {Opcode: 0x46, Length: 1},
 	"MOV B,A": {Opcode: 0x47, Length: 1},
-
 	"MOV C,B": {Opcode: 0x48, Length: 1},
 	"MOV C,C": {Opcode: 0x49, Length: 1},
 	"MOV C,D": {Opcode: 0x4A, Length: 1},
@@ -37,7 +35,6 @@ var instructionSet = map[string]Instruction{
 	"MOV C,L": {Opcode: 0x4D, Length: 1},
 	"MOV C,M": {Opcode: 0x4E, Length: 1},
 	"MOV C,A": {Opcode: 0x4F, Length: 1},
-
 	"MOV D,B": {Opcode: 0x50, Length: 1},
 	"MOV D,C": {Opcode: 0x51, Length: 1},
 	"MOV D,D": {Opcode: 0x52, Length: 1},
@@ -46,7 +43,6 @@ var instructionSet = map[string]Instruction{
 	"MOV D,L": {Opcode: 0x55, Length: 1},
 	"MOV D,M": {Opcode: 0x56, Length: 1},
 	"MOV D,A": {Opcode: 0x57, Length: 1},
-
 	"MOV E,B": {Opcode: 0x58, Length: 1},
 	"MOV E,C": {Opcode: 0x59, Length: 1},
 	"MOV E,D": {Opcode: 0x5A, Length: 1},
@@ -55,7 +51,6 @@ var instructionSet = map[string]Instruction{
 	"MOV E,L": {Opcode: 0x5D, Length: 1},
 	"MOV E,M": {Opcode: 0x5E, Length: 1},
 	"MOV E,A": {Opcode: 0x5F, Length: 1},
-
 	"MOV H,B": {Opcode: 0x60, Length: 1},
 	"MOV H,C": {Opcode: 0x61, Length: 1},
 	"MOV H,D": {Opcode: 0x62, Length: 1},
@@ -64,7 +59,6 @@ var instructionSet = map[string]Instruction{
 	"MOV H,L": {Opcode: 0x65, Length: 1},
 	"MOV H,M": {Opcode: 0x66, Length: 1},
 	"MOV H,A": {Opcode: 0x67, Length: 1},
-
 	"MOV L,B": {Opcode: 0x68, Length: 1},
 	"MOV L,C": {Opcode: 0x69, Length: 1},
 	"MOV L,D": {Opcode: 0x6A, Length: 1},
@@ -73,7 +67,6 @@ var instructionSet = map[string]Instruction{
 	"MOV L,L": {Opcode: 0x6D, Length: 1},
 	"MOV L,M": {Opcode: 0x6E, Length: 1},
 	"MOV L,A": {Opcode: 0x6F, Length: 1},
-
 	"MOV M,B": {Opcode: 0x70, Length: 1},
 	"MOV M,C": {Opcode: 0x71, Length: 1},
 	"MOV M,D": {Opcode: 0x72, Length: 1},
@@ -81,28 +74,26 @@ var instructionSet = map[string]Instruction{
 	"MOV M,H": {Opcode: 0x74, Length: 1},
 	"MOV M,L": {Opcode: 0x75, Length: 1},
 	"MOV M,A": {Opcode: 0x77, Length: 1},
-
-	"MVI B": {Opcode: 0x06, Length: 2},
-	"MVI C": {Opcode: 0x0E, Length: 2},
-	"MVI D": {Opcode: 0x16, Length: 2},
-	"MVI E": {Opcode: 0x1E, Length: 2},
-	"MVI H": {Opcode: 0x26, Length: 2},
-	"MVI L": {Opcode: 0x2E, Length: 2},
-	"MVI M": {Opcode: 0x36, Length: 2},
-	"MVI A": {Opcode: 0x3E, Length: 2},
-
-	"LXI B":  {Opcode: 0x01, Length: 3},
-	"LXI D":  {Opcode: 0x11, Length: 3},
-	"LXI H":  {Opcode: 0x21, Length: 3},
-	"STAX B": {Opcode: 0x02, Length: 1},
-	"STAX D": {Opcode: 0x12, Length: 1},
-	"LDAX B": {Opcode: 0x0A, Length: 1},
-	"LDAX D": {Opcode: 0x1A, Length: 1},
-	"STA":    {Opcode: 0x32, Length: 3},
-	"LDA":    {Opcode: 0x3A, Length: 3},
-	"SHLD":   {Opcode: 0x22, Length: 3},
-	"LHLD":   {Opcode: 0x2A, Length: 3},
-	"XCHG":   {Opcode: 0xEB, Length: 1},
+	"MVI B":   {Opcode: 0x06, Length: 2},
+	"MVI C":   {Opcode: 0x0E, Length: 2},
+	"MVI D":   {Opcode: 0x16, Length: 2},
+	"MVI E":   {Opcode: 0x1E, Length: 2},
+	"MVI H":   {Opcode: 0x26, Length: 2},
+	"MVI L":   {Opcode: 0x2E, Length: 2},
+	"MVI M":   {Opcode: 0x36, Length: 2},
+	"MVI A":   {Opcode: 0x3E, Length: 2},
+	"LXI B":   {Opcode: 0x01, Length: 3},
+	"LXI D":   {Opcode: 0x11, Length: 3},
+	"LXI H":   {Opcode: 0x21, Length: 3},
+	"STAX B":  {Opcode: 0x02, Length: 1},
+	"STAX D":  {Opcode: 0x12, Length: 1},
+	"LDAX B":  {Opcode: 0x0A, Length: 1},
+	"LDAX D":  {Opcode: 0x1A, Length: 1},
+	"STA":     {Opcode: 0x32, Length: 3},
+	"LDA":     {Opcode: 0x3A, Length: 3},
+	"SHLD":    {Opcode: 0x22, Length: 3},
+	"LHLD":    {Opcode: 0x2A, Length: 3},
+	"XCHG":    {Opcode: 0xEB, Length: 1},
 
 	// STACK OPERATIONS
 	"PUSH B":   {Opcode: 0xC5, Length: 1},
@@ -173,7 +164,6 @@ var instructionSet = map[string]Instruction{
 	"INR L": {Opcode: 0x2C, Length: 1},
 	"INR M": {Opcode: 0x34, Length: 1},
 	"INR A": {Opcode: 0x3C, Length: 1},
-
 	"DCR B": {Opcode: 0x05, Length: 1},
 	"DCR C": {Opcode: 0x0D, Length: 1},
 	"DCR D": {Opcode: 0x15, Length: 1},
@@ -182,11 +172,9 @@ var instructionSet = map[string]Instruction{
 	"DCR L": {Opcode: 0x2D, Length: 1},
 	"DCR M": {Opcode: 0x35, Length: 1},
 	"DCR A": {Opcode: 0x3D, Length: 1},
-
 	"INX B": {Opcode: 0x03, Length: 1},
 	"INX D": {Opcode: 0x13, Length: 1},
 	"INX H": {Opcode: 0x23, Length: 1},
-
 	"DCX B": {Opcode: 0x0B, Length: 1},
 	"DCX D": {Opcode: 0x1B, Length: 1},
 	"DCX H": {Opcode: 0x2B, Length: 1},
@@ -200,7 +188,6 @@ var instructionSet = map[string]Instruction{
 	"ADD L": {Opcode: 0x85, Length: 1},
 	"ADD M": {Opcode: 0x86, Length: 1},
 	"ADD A": {Opcode: 0x87, Length: 1},
-
 	"ADC B": {Opcode: 0x88, Length: 1},
 	"ADC C": {Opcode: 0x89, Length: 1},
 	"ADC D": {Opcode: 0x8A, Length: 1},
@@ -209,10 +196,8 @@ var instructionSet = map[string]Instruction{
 	"ADC L": {Opcode: 0x8D, Length: 1},
 	"ADC M": {Opcode: 0x8E, Length: 1},
 	"ADC A": {Opcode: 0x8F, Length: 1},
-
-	"ADI": {Opcode: 0xC6, Length: 2},
-	"ACI": {Opcode: 0xCE, Length: 2},
-
+	"ADI":   {Opcode: 0xC6, Length: 2},
+	"ACI":   {Opcode: 0xCE, Length: 2},
 	"DAD B": {Opcode: 0x09, Length: 1},
 	"DAD D": {Opcode: 0x19, Length: 1},
 	"DAD H": {Opcode: 0x29, Length: 1},
@@ -226,7 +211,6 @@ var instructionSet = map[string]Instruction{
 	"SUB L": {Opcode: 0x95, Length: 1},
 	"SUB M": {Opcode: 0x96, Length: 1},
 	"SUB A": {Opcode: 0x97, Length: 1},
-
 	"SBB B": {Opcode: 0x98, Length: 1},
 	"SBB C": {Opcode: 0x99, Length: 1},
 	"SBB D": {Opcode: 0x9A, Length: 1},
@@ -235,9 +219,8 @@ var instructionSet = map[string]Instruction{
 	"SBB L": {Opcode: 0x9D, Length: 1},
 	"SBB M": {Opcode: 0x9E, Length: 1},
 	"SBB A": {Opcode: 0x9F, Length: 1},
-
-	"SUI": {Opcode: 0xD6, Length: 2},
-	"SBI": {Opcode: 0xDE, Length: 2},
+	"SUI":   {Opcode: 0xD6, Length: 2},
+	"SBI":   {Opcode: 0xDE, Length: 2},
 
 	// LOGICAL
 	"ANA B": {Opcode: 0xA0, Length: 1},
@@ -248,7 +231,6 @@ var instructionSet = map[string]Instruction{
 	"ANA L": {Opcode: 0xA5, Length: 1},
 	"ANA M": {Opcode: 0xA6, Length: 1},
 	"ANA A": {Opcode: 0xA7, Length: 1},
-
 	"XRA B": {Opcode: 0xA8, Length: 1},
 	"XRA C": {Opcode: 0xA9, Length: 1},
 	"XRA D": {Opcode: 0xAA, Length: 1},
@@ -257,7 +239,6 @@ var instructionSet = map[string]Instruction{
 	"XRA L": {Opcode: 0xAD, Length: 1},
 	"XRA M": {Opcode: 0xAE, Length: 1},
 	"XRA A": {Opcode: 0xAF, Length: 1},
-
 	"ORA B": {Opcode: 0xB0, Length: 1},
 	"ORA C": {Opcode: 0xB1, Length: 1},
 	"ORA D": {Opcode: 0xB2, Length: 1},
@@ -266,7 +247,6 @@ var instructionSet = map[string]Instruction{
 	"ORA L": {Opcode: 0xB5, Length: 1},
 	"ORA M": {Opcode: 0xB6, Length: 1},
 	"ORA A": {Opcode: 0xB7, Length: 1},
-
 	"CMP B": {Opcode: 0xB8, Length: 1},
 	"CMP C": {Opcode: 0xB9, Length: 1},
 	"CMP D": {Opcode: 0xBA, Length: 1},
@@ -275,11 +255,10 @@ var instructionSet = map[string]Instruction{
 	"CMP L": {Opcode: 0xBD, Length: 1},
 	"CMP M": {Opcode: 0xBE, Length: 1},
 	"CMP A": {Opcode: 0xBF, Length: 1},
-
-	"ANI": {Opcode: 0xE6, Length: 2},
-	"XRI": {Opcode: 0xEE, Length: 2},
-	"ORI": {Opcode: 0xF6, Length: 2},
-	"CPI": {Opcode: 0xFE, Length: 2},
+	"ANI":   {Opcode: 0xE6, Length: 2},
+	"XRI":   {Opcode: 0xEE, Length: 2},
+	"ORI":   {Opcode: 0xF6, Length: 2},
+	"CPI":   {Opcode: 0xFE, Length: 2},
 
 	// ROTATE
 	"RLC": {Opcode: 0x07, Length: 1},
