@@ -20,8 +20,6 @@ This project takes an input string, tokenises the string into a slice of tokens,
 - Label support
 - Data support (define byte, word, storage)
 - Input from STDIN
-- Find a more robust way to deal with mixed case inputs (`0x` vs `0X` which are both valid prefixes)
-- Create some `New()` functions to make it clearer what's happening in our consumers
 
 # Usage
 
