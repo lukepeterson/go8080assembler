@@ -9,20 +9,21 @@ import (
 
 func main() {
 	code := `
-		MVI A, 34h
-		MOV B, C
-		LDA, 1234h
+		MVI A, 0x33
+TESTX:	MOV B, C
+		LDA, 0x1234
+		JMP TESTX
 		HLT
 	`
 
-	assembler := assembler.New()
+	asm := assembler.New()
 
-	err := assembler.Assemble(code)
+	err := asm.Assemble(code)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, instruction := range assembler.ByteCode {
+	for _, instruction := range asm.ByteCode {
 		fmt.Printf("%02X ", instruction)
 	}
 }
