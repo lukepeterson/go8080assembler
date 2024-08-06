@@ -2,7 +2,7 @@
 
 What good is [an 8080 CPU emulator](https://github.com/lukepeterson/go8080cpu) without an assembler?
 
-This project takes an input string, tokenises the string into a slice of tokens, then parses those tokens, converting each to a valid 8080 opcode.
+This project is an Intel 8080 CPU assembler.  As an input, it takes a newline separated string of 8080 instructions, parses and validates the tokens, and then returns the assembled byte code.
 
 [![Tests](https://github.com/lukepeterson/go8080assembler/actions/workflows/go.yml/badge.svg)](https://github.com/lukepeterson/go8080assembler/actions/workflows/go.yml)
 ![Go Report Card](https://goreportcard.com/badge/github.com/lukepeterson/go8080assembler)
@@ -13,13 +13,13 @@ This project takes an input string, tokenises the string into a slice of tokens,
 - :white_check_mark: Tokeniser
 - :white_check_mark: Parser
 - :white_check_mark: Comment support
-- :white_check_mark: Supports all 244 instructions on the 8080 cpu
+- :white_check_mark: Supports full (244) 8080 CPU instructions
 
 # TODO
 
 - Label support
-- Data support (define byte, word, storage)
-- Input from STDIN
+- Data support (eg, `DB`, `DW`)
+- Input from `STDIN`
 
 # Usage
 
