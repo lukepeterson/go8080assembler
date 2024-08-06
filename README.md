@@ -1,8 +1,8 @@
 # Intel 8080 CPU assembler in Go
 
-What good is [an 8080 CPU emulator](https://github.com/lukepeterson/go8080cpu) without an assembler?
+This is my Intel 8080 CPU assembler, which wrote to support [my Intel 8080 CPU emulator](https://github.com/lukepeterson/go8080cpu).  
 
-This project is an Intel 8080 CPU assembler.  As an input, it takes a newline separated string of 8080 instructions, parses and validates the tokens, and then returns the assembled byte code.
+It takes a newline separated string of Intel 8080 instructions, parses and validates the tokens, and then returns the assembled byte code.
 
 [![Tests](https://github.com/lukepeterson/go8080assembler/actions/workflows/go.yml/badge.svg)](https://github.com/lukepeterson/go8080assembler/actions/workflows/go.yml)
 ![Go Report Card](https://goreportcard.com/badge/github.com/lukepeterson/go8080assembler)
