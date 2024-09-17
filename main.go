@@ -1,9 +1,9 @@
 package main
 
-// import "github.com/lukepeterson/go8080assembler/assembler"
 import (
 	"fmt"
 
+	// import "github.com/lukepeterson/go8080assembler/assembler"
 	"github.com/lukepeterson/go8080assembler/pkg/lexer"
 )
 
@@ -32,7 +32,7 @@ func main() {
 			LDA, 1234h ; The second comment
 			JMP TEST
 
-		; The Third comment with a colon ; here
+		; The third comment with another colon ; here
 			`
 
 	myLexer := lexer.New(input)

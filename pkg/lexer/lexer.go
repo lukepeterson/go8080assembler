@@ -1,5 +1,7 @@
 package lexer
 
+import "fmt"
+
 type TokenType string
 
 const (
@@ -23,12 +25,26 @@ type Token struct {
 }
 
 type Lexer struct {
-	input string
-	// position int
+	input        string
+	position     int
+	readPosition int
+	currentChar  byte
 }
 
 func New(input string) *Lexer {
-	lexer := &Lexer{input: input}
-	// lexer.readChar()
-	return lexer
+	l := &Lexer{input: input}
+	l.readChar()
+	return l
+}
+
+func (l *Lexer) readChar() {
+	if l.readPosition >= len(l.input) {
+		l.currentChar = 0
+	} else {
+		l.currentChar = l.input[l.readPosition]
+	}
+	l.position = l.readPosition
+	l.readPosition++
+
+	fmt.Printf("l.readPosition: %v\n", l.readPosition)
 }
