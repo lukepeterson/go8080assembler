@@ -35,7 +35,10 @@ func main() {
 		; The third comment with another colon ; here
 			`
 
-	myLexer := lexer.New(input)
-	fmt.Printf("myLexer: %v\n", myLexer)
+	lexer := lexer.New(input)
+
+	for token := lexer.NextToken(); token.Type != "EOF"; token = lexer.NextToken() {
+		fmt.Printf("%+v\n", token)
+	}
 
 }
