@@ -59,49 +59,49 @@ func New(input string) *Lexer {
 	return lexer
 }
 
-func (lexer *Lexer) readChar() {
-	if lexer.readPosition >= len(lexer.input) {
-		lexer.currentChar = 0
+func (l *Lexer) readChar() {
+	if l.readPosition >= len(l.input) {
+		l.currentChar = 0
 	} else {
-		lexer.currentChar = lexer.input[lexer.readPosition]
+		l.currentChar = l.input[l.readPosition]
 	}
-	lexer.position = lexer.readPosition
-	lexer.readPosition++
+	l.position = l.readPosition
+	l.readPosition++
 
 }
 
-func (lexer *Lexer) NextToken() Token {
+func (l *Lexer) NextToken() Token {
 	var token Token
 
-	lexer.skipWhitespace()
+	l.skipWhitespace()
 
-	switch lexer.currentChar {
+	switch l.currentChar {
 	case ',':
-		token = newToken(COMMA, lexer.currentChar)
+		token = newToken(COMMA, l.currentChar)
 	case ':':
-		token = newToken(COLON, lexer.currentChar)
+		token = newToken(COLON, l.currentChar)
 	case ';':
 		token.Type = COMMENT
-		token.Literal = lexer.readComment()
+		token.Literal = l.readComment()
 	case 0:
 		token.Literal = ""
 		token.Type = EOF
 	default:
-		if isLetter(lexer.currentChar) || lexer.currentChar == '_' {
-			literal := lexer.readIdentifier()
+		if isLetter(l.currentChar) || l.currentChar == '_' {
+			literal := l.readIdentifier()
 			token.Literal = literal
-			token.Type = lexer.lookupIdentifier(strings.ToUpper(literal))
+			token.Type = l.lookupIdentifier(strings.ToUpper(literal))
 			return token
-		} else if isDigit(lexer.currentChar) {
+		} else if isDigit(l.currentChar) {
 			token.Type = NUMBER
-			token.Literal = lexer.readNumber()
+			token.Literal = l.readNumber()
 			return token
 		} else {
-			token = newToken(UNKNOWN, lexer.currentChar)
+			token = newToken(UNKNOWN, l.currentChar)
 		}
 	}
 
-	lexer.readChar()
+	l.readChar()
 	return token
 }
 
@@ -109,67 +109,67 @@ func newToken(tokenType TokenType, currentChar byte) Token {
 	return Token{Type: tokenType, Literal: string(currentChar)}
 }
 
-func (lexer *Lexer) skipWhitespace() {
-	for lexer.currentChar == ' ' || lexer.currentChar == '\t' || lexer.currentChar == '\n' {
-		lexer.readChar()
+func (l *Lexer) skipWhitespace() {
+	for l.currentChar == ' ' || l.currentChar == '\t' || l.currentChar == '\n' {
+		l.readChar()
 	}
 }
 
-func (lexer *Lexer) readIdentifier() string {
-	position := lexer.position
-	for isLetter(lexer.currentChar) || isDigit(lexer.currentChar) || lexer.currentChar == '_' {
-		lexer.readChar()
+func (l *Lexer) readIdentifier() string {
+	position := l.position
+	for isLetter(l.currentChar) || isDigit(l.currentChar) || l.currentChar == '_' {
+		l.readChar()
 	}
-	return lexer.input[position:lexer.position]
+	return l.input[position:l.position]
 }
 
-func (lexer *Lexer) readNumber() string {
-	position := lexer.position
+func (l *Lexer) readNumber() string {
+	position := l.position
 
 	// Check for '0x' prefix
-	if lexer.currentChar == '0' && (lexer.peekChar() == 'x' || lexer.peekChar() == 'X') {
-		lexer.readChar() // consume '0'
-		lexer.readChar() // consume 'x' or 'X'
+	if l.currentChar == '0' && (l.peekChar() == 'x' || l.peekChar() == 'X') {
+		l.readChar() // consume '0'
+		l.readChar() // consume 'x' or 'X'
 	}
 
-	for isDigit(lexer.currentChar) || isHex(lexer.currentChar) {
-		lexer.readChar()
+	for isDigit(l.currentChar) || isHex(l.currentChar) {
+		l.readChar()
 	}
 
 	// Check for 'H' suffix
-	if lexer.currentChar == 'H' || lexer.currentChar == 'h' {
-		lexer.readChar()
+	if l.currentChar == 'H' || l.currentChar == 'h' {
+		l.readChar()
 	}
 
-	return lexer.input[position:lexer.position]
+	return l.input[position:l.position]
 }
 
-func (lexer *Lexer) readComment() string {
-	position := lexer.position
-	for lexer.currentChar != '\n' && lexer.currentChar != 0 {
-		lexer.readChar()
+func (l *Lexer) readComment() string {
+	position := l.position
+	for l.currentChar != '\n' && l.currentChar != 0 {
+		l.readChar()
 	}
-	return lexer.input[position:lexer.position]
+	return l.input[position:l.position]
 }
 
-func (lexer *Lexer) lookupIdentifier(ident string) TokenType {
+func (l *Lexer) lookupIdentifier(ident string) TokenType {
 
 	ident = strings.ToUpper(ident)
 
-	if tokenType, ok := mnemonics[ident]; ok {
+	if tokenType, exists := mnemonics[ident]; exists {
 		return tokenType
 	}
-	if tokenType, ok := registers[ident]; ok {
+	if tokenType, exists := registers[ident]; exists {
 		return tokenType
 	}
 	return IDENT
 }
 
-func (lexer *Lexer) peekChar() byte {
-	if lexer.readPosition >= len(lexer.input) {
+func (l *Lexer) peekChar() byte {
+	if l.readPosition >= len(l.input) {
 		return 0
 	} else {
-		return lexer.input[lexer.readPosition]
+		return l.input[l.readPosition]
 	}
 }
 
