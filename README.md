@@ -1,6 +1,6 @@
 # Intel 8080 CPU assembler in Go
 
-This is my Intel 8080 CPU assembler, which wrote to support [my Intel 8080 CPU emulator](https://github.com/lukepeterson/go8080cpu).  
+This is my Intel 8080 CPU assembler, which I wrote to support [my Intel 8080 CPU emulator](https://github.com/lukepeterson/go8080cpu).  
 
 It takes a newline separated string of Intel 8080 instructions, parses and validates the tokens, and then returns the assembled byte code.
 
