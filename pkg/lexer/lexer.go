@@ -16,15 +16,13 @@ const (
 	COMMA = "COMMA"
 	COLON = "COLON"
 
-	IDENT    = "IDENT"
+	LABEL    = "LABEL"
 	NUMBER   = "NUMBER"
 	REGISTER = "REGISTER"
 	MNEMONIC = "MNEMONIC"
 
 	COMMENT = "COMMENT"
 	EOF     = "EOF"
-
-	UNKNOWN = "UNKNOWN"
 )
 
 var mnemonics = map[string]TokenType{
@@ -35,7 +33,6 @@ var mnemonics = map[string]TokenType{
 	"INX": MNEMONIC,
 	"INR": MNEMONIC,
 	"JMP": MNEMONIC,
-	// and the rest
 }
 
 var registers = map[string]TokenType{
@@ -43,7 +40,10 @@ var registers = map[string]TokenType{
 	"B": REGISTER,
 	"C": REGISTER,
 	"D": REGISTER,
-	// and the rest
+	"E": REGISTER,
+	"H": REGISTER,
+	"L": REGISTER,
+	"M": REGISTER,
 }
 
 type Lexer struct {
@@ -84,20 +84,18 @@ func (l *Lexer) NextToken() Token {
 		token.Type = COMMENT
 		token.Literal = l.readComment()
 	case 0:
-		token.Literal = ""
 		token.Type = EOF
 	default:
-		if isLetter(l.currentChar) || l.currentChar == '_' {
+		if isLetter(l.currentChar) {
 			literal := l.readIdentifier()
-			token.Literal = literal
 			token.Type = l.lookupIdentifier(strings.ToUpper(literal))
+			token.Literal = literal
 			return token
-		} else if isDigit(l.currentChar) {
+		}
+		if isDigit(l.currentChar) {
 			token.Type = NUMBER
 			token.Literal = l.readNumber()
 			return token
-		} else {
-			token = newToken(UNKNOWN, l.currentChar)
 		}
 	}
 
@@ -117,7 +115,7 @@ func (l *Lexer) skipWhitespace() {
 
 func (l *Lexer) readIdentifier() string {
 	position := l.position
-	for isLetter(l.currentChar) || isDigit(l.currentChar) || l.currentChar == '_' {
+	for isLetter(l.currentChar) || isDigit(l.currentChar) {
 		l.readChar()
 	}
 	return l.input[position:l.position]
@@ -162,7 +160,7 @@ func (l *Lexer) lookupIdentifier(ident string) TokenType {
 	if tokenType, exists := registers[ident]; exists {
 		return tokenType
 	}
-	return IDENT
+	return LABEL
 }
 
 func (l *Lexer) peekChar() byte {

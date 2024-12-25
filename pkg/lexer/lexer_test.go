@@ -5,19 +5,28 @@ import (
 )
 
 func TestNextToken(t *testing.T) {
-	input := "START: MOV A, B ; Comment"
+	input := `
+		START: MOV A, B ; 1st comment
+		INR A
+				; 2nd comment
+		`
 
 	tests := []struct {
 		expectedType    TokenType
 		expectedLiteral string
 	}{
-		{IDENT, "START"},
+		{LABEL, "START"},
 		{COLON, ":"},
 		{MNEMONIC, "MOV"},
 		{REGISTER, "A"},
 		{COMMA, ","},
 		{REGISTER, "B"},
-		{COMMENT, "; Comment"},
+		{COMMENT, "; 1st comment"},
+
+		{MNEMONIC, "INR"},
+		{REGISTER, "A"},
+		{COMMENT, "; 2nd comment"},
+
 		{EOF, ""},
 	}
 
@@ -25,7 +34,7 @@ func TestNextToken(t *testing.T) {
 	for _, tt := range tests {
 		token := l.NextToken()
 		if token.Type != tt.expectedType {
-			t.Fatalf("NextToken()\ngot type = %+v, \nwant type = %+v", tt.expectedType, token.Type)
+			t.Fatalf("NextToken()\ngot type = %+q, \nwant type = %+q", tt.expectedType, token.Type)
 
 		}
 		if token.Literal != tt.expectedLiteral {
