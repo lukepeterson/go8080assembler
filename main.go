@@ -37,30 +37,33 @@ func main() {
 	// 		`
 
 	input := `
-	MOV A, B
-	START:
-	MOV C, D
-	JMP START
+
+				MOV A, B
+				END2:
+				JMP END
+				MOV C, D
+				JMP END2
+				END:
 
 	`
 
 	// Lex
 	l := lexer.New(input)
+	// TOOD: Move this functioality into lexer.go - it owns this behaviour
 	var tokens []lexer.Token
 	for token := l.NextToken(); token.Type != "EOF"; token = l.NextToken() {
 		tokens = append(tokens, token)
 	}
 	tokens = append(tokens, lexer.Token{Type: lexer.EOF})
-	fmt.Printf("tokens: %v\n", tokens)
 
 	// Parse
 	p := parser.New(tokens)
-	program, err := p.Parse()
+	err := p.Parse()
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	for _, b := range program {
+	for _, b := range p.Bytecode {
 		fmt.Printf("%02X ", b)
 	}
 	fmt.Println()

@@ -9,14 +9,19 @@ import (
 )
 
 type Parser struct {
-	tokens   []lexer.Token
-	position int
+	tokens           []lexer.Token
+	position         int
+	Bytecode         []byte
+	labelDefinitions map[string]uint16 // Stores resolved label addresses
+	labelReferences  map[string]uint16 // Tracks unresolved label usages
 }
 
 func New(tokens []lexer.Token) *Parser {
 	return &Parser{
-		tokens:   tokens,
-		position: 0,
+		tokens:           tokens,
+		position:         0,
+		labelDefinitions: make(map[string]uint16),
+		labelReferences:  make(map[string]uint16),
 	}
 }
 
@@ -33,42 +38,51 @@ func (p *Parser) currentToken() lexer.Token {
 	return lexer.Token{Type: lexer.EOF}
 }
 
-func (p *Parser) Parse() ([]byte, error) {
-	hexCodes := []byte{}
-
+func (p *Parser) Parse() error {
 	for p.currentToken().Type != lexer.EOF {
-		// fmt.Printf("p.currentToken(): %v\n", p.currentToken())
 
 		switch p.currentToken().Type {
 		case lexer.MNEMONIC:
 			hexCode, err := p.parseInstruction()
 			if err != nil {
-				return nil, err
+				return err
 			}
-			hexCodes = append(hexCodes, hexCode...)
+			p.Bytecode = append(p.Bytecode, hexCode...)
 
 		case lexer.COMMENT:
 			// do nothing
 
 		case lexer.LABEL:
-			fmt.Printf("Found label definition (\"%s\") at position 0x%02X\n", p.currentToken().Literal, len(hexCodes))
 
-			// store our label in a lookup table?
-			p.advanceToken() // skip past the comma
+			// TODO: Check for duplicate labels and error if found
+			p.labelDefinitions[p.currentToken().Literal] = uint16(len(p.Bytecode))
+
+			p.advanceToken()
 
 		default:
-			return nil, fmt.Errorf("unexpected token type \"%s\", literal: \"%s\"", p.currentToken().Type, p.currentToken().Literal)
+			return fmt.Errorf("unexpected token type \"%s\", literal: \"%s\"", p.currentToken().Type, p.currentToken().Literal)
 		}
 
 		p.advanceToken()
 	}
 
-	return hexCodes, nil
+	// TODO: Split this out into a second pass
+	for labelReference, location := range p.labelReferences {
+		hex := p.labelDefinitions[labelReference]
+
+		highByte := uint8(hex >> 8)
+		lowByte := uint8(hex & 0x00FF)
+
+		p.Bytecode[location] = lowByte
+		p.Bytecode[location+1] = highByte
+	}
+
+	return nil
 }
 
 func (p *Parser) parseInstruction() ([]byte, error) {
 	instruction := p.currentToken().Literal
-	p.advanceToken() // Move past the mnemonic
+	p.advanceToken()
 
 	switch instruction {
 	case "MOV":
@@ -84,18 +98,18 @@ func (p *Parser) parseMOV() ([]byte, error) {
 	if p.currentToken().Type != lexer.REGISTER {
 		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
 	}
-	dest := p.currentToken().Literal // Destination register
+	dest := p.currentToken().Literal
 	p.advanceToken()
 
 	if p.currentToken().Type != lexer.COMMA {
 		return nil, fmt.Errorf("expected comma, got: %s", p.currentToken().Literal)
 	}
-	p.advanceToken() // Skip COMMA
+	p.advanceToken()
 
 	if p.currentToken().Type != lexer.REGISTER {
 		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
 	}
-	src := p.currentToken().Literal // Source register
+	src := p.currentToken().Literal
 
 	return generateMOVHex(src, dest)
 }
@@ -118,7 +132,6 @@ func generateMOVHex(src, dest string) ([]byte, error) {
 func (p *Parser) parseJMP() ([]byte, error) {
 
 	if p.currentToken().Type == lexer.NUMBER {
-		// fmt.Printf("p.currentToken().Literal: %T\n", p.currentToken().Literal)
 		highByte, lowByte, err := parseHex(p.currentToken().Literal)
 		if err != nil {
 			fmt.Printf("err: %v\n", err)
@@ -127,19 +140,17 @@ func (p *Parser) parseJMP() ([]byte, error) {
 		return []byte{0xC3, lowByte, highByte}, nil
 	}
 
+	// If the destination isn't a number, assume it's a label
 	if p.currentToken().Type == lexer.LABEL {
 
-		// Do the label lookup steps here?
-		// We might not have a label yet, so perhaps store a placeholder for a second parser round?
+		p.labelReferences[p.currentToken().Literal] = uint16(len(p.Bytecode) + 1)
 
-		lowByte := byte(0xFA)
-		highByte := byte(0xFB)
-
-		return []byte{0xC3, lowByte, highByte}, nil
+		// Labels can be used before they exist, so we use 0x0000 as a placeholder
+		// until we know all the label locations.
+		return []byte{0xC3, 0x00, 0x00}, nil
 	}
 
 	return nil, fmt.Errorf("expected address or label, got: %s", p.currentToken().Type)
-
 }
 
 func parseHex(token string) (uint8, uint8, error) {
