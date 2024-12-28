@@ -41,7 +41,7 @@ func TestParser_Parse(t *testing.T) {
 			wantErr:      false,
 		},
 		{
-			name: "Multiple labels",
+			name: "multiple labels",
 			tokens: []lexer.Token{
 				{Type: lexer.MNEMONIC, Literal: "MOV"},
 				{Type: lexer.REGISTER, Literal: "A"},
@@ -101,9 +101,7 @@ func TestParser_Parse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			p := New(tt.tokens)
-
-			err := p.Parse()
-			got := p.Bytecode
+			got, err := p.Parse()
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parser.Parse() error = %v, wantErr %v", err, tt.wantErr)
@@ -111,6 +109,43 @@ func TestParser_Parse(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.wantBytecode) {
 				t.Errorf("Parser.Parse() = %X, want %X", got, tt.wantBytecode)
+			}
+		})
+	}
+}
+
+func TestParser_parseJMP(t *testing.T) {
+	type fields struct {
+		tokens           []lexer.Token
+		position         int
+		bytecode         []byte
+		labelDefinitions map[string]uint16
+		labelReferences  map[string]uint16
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    []byte
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := &Parser{
+				tokens:           tt.fields.tokens,
+				position:         tt.fields.position,
+				bytecode:         tt.fields.bytecode,
+				labelDefinitions: tt.fields.labelDefinitions,
+				labelReferences:  tt.fields.labelReferences,
+			}
+			got, err := p.parseJMP()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Parser.parseJMP() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Parser.parseJMP() = %v, want %v", got, tt.want)
 			}
 		})
 	}

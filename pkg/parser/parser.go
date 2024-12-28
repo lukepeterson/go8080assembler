@@ -11,7 +11,7 @@ import (
 type Parser struct {
 	tokens           []lexer.Token
 	position         int
-	Bytecode         []byte
+	bytecode         []byte
 	labelDefinitions map[string]uint16 // Stores resolved label addresses
 	labelReferences  map[string]uint16 // Tracks unresolved label usages
 }
@@ -35,19 +35,20 @@ func (p *Parser) currentToken() lexer.Token {
 	if p.position < len(p.tokens) {
 		return p.tokens[p.position]
 	}
+
 	return lexer.Token{Type: lexer.EOF}
 }
 
-func (p *Parser) Parse() error {
+func (p *Parser) Parse() ([]byte, error) {
 	for p.currentToken().Type != lexer.EOF {
 
 		switch p.currentToken().Type {
 		case lexer.MNEMONIC:
 			hexCode, err := p.parseInstruction()
 			if err != nil {
-				return err
+				return nil, err
 			}
-			p.Bytecode = append(p.Bytecode, hexCode...)
+			p.bytecode = append(p.bytecode, hexCode...)
 
 		case lexer.COMMENT:
 			// do nothing
@@ -55,12 +56,12 @@ func (p *Parser) Parse() error {
 		case lexer.LABEL:
 
 			// TODO: Check for duplicate labels and error if found
-			p.labelDefinitions[p.currentToken().Literal] = uint16(len(p.Bytecode))
+			p.labelDefinitions[p.currentToken().Literal] = uint16(len(p.bytecode))
 
 			p.advanceToken()
 
 		default:
-			return fmt.Errorf("unexpected token type \"%s\", literal: \"%s\"", p.currentToken().Type, p.currentToken().Literal)
+			return nil, fmt.Errorf("unexpected token type \"%s\", literal: \"%s\"", p.currentToken().Type, p.currentToken().Literal)
 		}
 
 		p.advanceToken()
@@ -73,11 +74,11 @@ func (p *Parser) Parse() error {
 		highByte := uint8(hex >> 8)
 		lowByte := uint8(hex & 0x00FF)
 
-		p.Bytecode[location] = lowByte
-		p.Bytecode[location+1] = highByte
+		p.bytecode[location] = lowByte
+		p.bytecode[location+1] = highByte
 	}
 
-	return nil
+	return p.bytecode, nil
 }
 
 func (p *Parser) parseInstruction() ([]byte, error) {
@@ -119,13 +120,17 @@ func generateMOVHex(src, dest string) ([]byte, error) {
 		"A": 0x07, "B": 0x00, "C": 0x01, "D": 0x02, "E": 0x03, "H": 0x04, "L": 0x05, "M": 0x06,
 	}
 
-	srcCode, srcOk := registerMap[src]
-	destCode, destOk := registerMap[dest]
-	if !srcOk || !destOk {
-		return nil, fmt.Errorf("invalid register in MOV: src=%s, dest=%s", src, dest)
+	srcRegister, valid := registerMap[src]
+	if !valid {
+		return nil, fmt.Errorf("invalid source register in MOV: %s", src)
 	}
 
-	opcode := byte(0x40) | (destCode << 3) | srcCode
+	destRegister, valid := registerMap[dest]
+	if !valid {
+		return nil, fmt.Errorf("invalid destination register in MOV: %s", dest)
+	}
+
+	opcode := byte(0x40) | (destRegister << 3) | srcRegister
 	return []byte{opcode}, nil
 }
 
@@ -143,7 +148,7 @@ func (p *Parser) parseJMP() ([]byte, error) {
 	// If the destination isn't a number, assume it's a label
 	if p.currentToken().Type == lexer.LABEL {
 
-		p.labelReferences[p.currentToken().Literal] = uint16(len(p.Bytecode) + 1)
+		p.labelReferences[p.currentToken().Literal] = uint16(len(p.bytecode) + 1)
 
 		// Labels can be used before they exist, so we use 0x0000 as a placeholder
 		// until we know all the label locations.

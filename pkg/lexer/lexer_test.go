@@ -1,44 +1,107 @@
 package lexer
 
 import (
+	"reflect"
 	"testing"
 )
 
-func TestNextToken(t *testing.T) {
-	input := `
-		START: MOV A, B ; 1st comment
-		INR A
-				; 2nd comment
-		`
-
+func TestLexer_Lex(t *testing.T) {
 	tests := []struct {
-		expectedType    TokenType
-		expectedLiteral string
+		name    string
+		input   string
+		want    []Token
+		wantErr bool
 	}{
-		{LABEL, "START"},
-		{COLON, ":"},
-		{MNEMONIC, "MOV"},
-		{REGISTER, "A"},
-		{COMMA, ","},
-		{REGISTER, "B"},
-		{COMMENT, "; 1st comment"},
-
-		{MNEMONIC, "INR"},
-		{REGISTER, "A"},
-		{COMMENT, "; 2nd comment"},
-
-		{EOF, ""},
+		{
+			name:  "case sensitivity",
+			input: "mov",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "MOV"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "single byte instruction without space",
+			input: "HLT",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "HLT"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "single byte instruction with space",
+			input: "  HLT  ",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "HLT"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "single byte instruction with comma and space after comma",
+			input: "MOV B, H",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "MOV"},
+				{Type: REGISTER, Literal: "B"},
+				{Type: COMMA, Literal: ","},
+				{Type: REGISTER, Literal: "H"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "single byte instruction with comma and space before comma",
+			input: "MOV B ,H",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "MOV"},
+				{Type: REGISTER, Literal: "B"},
+				{Type: COMMA, Literal: ","},
+				{Type: REGISTER, Literal: "H"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "two byte instruction",
+			input: "MVI B, 34h",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "MVI"},
+				{Type: REGISTER, Literal: "B"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "34H"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "three byte instruction",
+			input: "LDA, 3412h",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "LDA"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "3412H"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "lots of extra space",
+			input: "    mov B ,      C   ",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "MOV"},
+				{Type: REGISTER, Literal: "B"},
+				{Type: COMMA, Literal: ","},
+				{Type: REGISTER, Literal: "C"},
+				{Type: EOF},
+			},
+		},
 	}
-
-	l := New(input)
 	for _, tt := range tests {
-		token := l.NextToken()
-		if token.Type != tt.expectedType {
-			t.Fatalf("NextToken()\ngot type = %+q, \nwant type = %+q", tt.expectedType, token.Type)
-
-		}
-		if token.Literal != tt.expectedLiteral {
-			t.Fatalf("NextToken()\ngot literal = %+q, \nwant literal = %+q", tt.expectedLiteral, token.Literal)
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			lexer := New(tt.input)
+			got, err := lexer.Lex()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Lexer.Lex() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Lexer.Lex() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
