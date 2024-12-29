@@ -13,84 +13,6 @@ func TestLexer_Lex(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:  "case sensitivity",
-			input: "mov",
-			want: []Token{
-				{Type: MNEMONIC, Literal: "MOV"},
-				{Type: EOF},
-			},
-		},
-		{
-			name:  "single byte instruction without space",
-			input: "HLT",
-			want: []Token{
-				{Type: MNEMONIC, Literal: "HLT"},
-				{Type: EOF},
-			},
-		},
-		{
-			name:  "single byte instruction with space",
-			input: "  HLT  ",
-			want: []Token{
-				{Type: MNEMONIC, Literal: "HLT"},
-				{Type: EOF},
-			},
-		},
-		{
-			name:  "single byte instruction with comma and space after comma",
-			input: "MOV B, H",
-			want: []Token{
-				{Type: MNEMONIC, Literal: "MOV"},
-				{Type: REGISTER, Literal: "B"},
-				{Type: COMMA, Literal: ","},
-				{Type: REGISTER, Literal: "H"},
-				{Type: EOF},
-			},
-		},
-		{
-			name:  "single byte instruction with comma and space before comma",
-			input: "MOV B ,H",
-			want: []Token{
-				{Type: MNEMONIC, Literal: "MOV"},
-				{Type: REGISTER, Literal: "B"},
-				{Type: COMMA, Literal: ","},
-				{Type: REGISTER, Literal: "H"},
-				{Type: EOF},
-			},
-		},
-		{
-			name:  "two byte instruction",
-			input: "MVI B, 34h",
-			want: []Token{
-				{Type: MNEMONIC, Literal: "MVI"},
-				{Type: REGISTER, Literal: "B"},
-				{Type: COMMA, Literal: ","},
-				{Type: NUMBER, Literal: "34H"},
-				{Type: EOF},
-			},
-		},
-		{
-			name:  "three byte instruction",
-			input: "LDA, 3412h",
-			want: []Token{
-				{Type: MNEMONIC, Literal: "LDA"},
-				{Type: COMMA, Literal: ","},
-				{Type: NUMBER, Literal: "3412H"},
-				{Type: EOF},
-			},
-		},
-		{
-			name:  "lots of extra space",
-			input: "    mov B ,      C   ",
-			want: []Token{
-				{Type: MNEMONIC, Literal: "MOV"},
-				{Type: REGISTER, Literal: "B"},
-				{Type: COMMA, Literal: ","},
-				{Type: REGISTER, Literal: "C"},
-				{Type: EOF},
-			},
-		},
-		{
 			name:  "move, load and store mnemonics",
 			input: "MOV MVI LXI STAX LDAX STA LDA SHLD LHLD XCHG",
 			want: []Token{
@@ -260,6 +182,14 @@ func TestLexer_Lex(t *testing.T) {
 			},
 		},
 		{
+			name:  "other mnemonics",
+			input: "DB",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "DB"},
+				{Type: EOF},
+			},
+		},
+		{
 			name:  "general purpose registers",
 			input: "A B C D E H L M",
 			want: []Token{
@@ -280,6 +210,100 @@ func TestLexer_Lex(t *testing.T) {
 			want: []Token{
 				{Type: REGISTER, Literal: "SP"},
 				{Type: REGISTER, Literal: "PSW"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "case sensitivity",
+			input: "mov",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "MOV"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "single byte instruction without space",
+			input: "HLT",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "HLT"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "single byte instruction with space",
+			input: "  HLT  ",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "HLT"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "single byte instruction with comma and space after comma",
+			input: "MOV B, H",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "MOV"},
+				{Type: REGISTER, Literal: "B"},
+				{Type: COMMA, Literal: ","},
+				{Type: REGISTER, Literal: "H"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "single byte instruction with comma and space before comma",
+			input: "MOV B ,H",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "MOV"},
+				{Type: REGISTER, Literal: "B"},
+				{Type: COMMA, Literal: ","},
+				{Type: REGISTER, Literal: "H"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "two byte instruction",
+			input: "MVI B, 34h",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "MVI"},
+				{Type: REGISTER, Literal: "B"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "34H"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "three byte instruction",
+			input: "LDA, 3412h",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "LDA"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "3412H"},
+				{Type: EOF},
+			},
+		},
+		{
+			name:  "lots of extra space",
+			input: "    mov B ,      C   ",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "MOV"},
+				{Type: REGISTER, Literal: "B"},
+				{Type: COMMA, Literal: ","},
+				{Type: REGISTER, Literal: "C"},
+				{Type: EOF},
+			},
+		},
+		// TODO: Fix the capitalisation of 0X00 (should be 0x00)
+		{
+			name:  "DB with string",
+			input: "DB 'mystring', 0x04, 0x05, '$'",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "DB"},
+				{Type: STRING, Literal: "mystring"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "0X04"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "0X05"},
+				{Type: COMMA, Literal: ","},
+				{Type: STRING, Literal: "$"},
 				{Type: EOF},
 			},
 		},

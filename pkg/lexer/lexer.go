@@ -18,6 +18,7 @@ const (
 	NUMBER   = "NUMBER"
 	COMMA    = "COMMA"
 	COLON    = "COLON"
+	STRING   = "STRING"
 	LABEL    = "LABEL"
 	COMMENT  = "COMMENT"
 	EOF      = "EOF"
@@ -129,6 +130,9 @@ var mnemonics = map[string]TokenType{
 	"DI":  MNEMONIC,
 	"NOP": MNEMONIC,
 	"HLT": MNEMONIC,
+
+	// OTHERS
+	"DB": MNEMONIC,
 }
 
 var registers = map[string]TokenType{
@@ -193,6 +197,10 @@ func (l *Lexer) NextToken() Token {
 	case ';':
 		token.Type = COMMENT
 		token.Literal = l.readComment()
+	case '\'':
+		token.Type = STRING
+		token.Literal = l.readString()
+
 	case 0x00:
 		token.Type = EOF
 	default:
@@ -254,6 +262,17 @@ func (l *Lexer) readComment() string {
 	position := l.position
 	for l.currentChar != '\n' && l.currentChar != 0x00 {
 		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+
+func (l *Lexer) readString() string {
+	position := l.position + 1
+	for {
+		l.readChar()
+		if l.currentChar == '\'' || l.currentChar == 0x00 {
+			break
+		}
 	}
 	return l.input[position:l.position]
 }

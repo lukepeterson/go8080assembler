@@ -90,6 +90,8 @@ func (p *Parser) parseInstruction() ([]byte, error) {
 		return p.parseMOV()
 	case "JMP":
 		return p.parseJMP()
+	case "DB":
+		return p.parseDB()
 	default:
 		return nil, fmt.Errorf("unknown instruction: %s", instruction)
 	}
@@ -156,6 +158,31 @@ func (p *Parser) parseJMP() ([]byte, error) {
 	}
 
 	return nil, fmt.Errorf("expected address or label, got: %s", p.currentToken().Type)
+}
+
+func (p *Parser) parseDB() ([]byte, error) {
+	var data []byte
+
+	for p.currentToken().Type == lexer.NUMBER || p.currentToken().Type == lexer.STRING {
+		if p.currentToken().Type == lexer.NUMBER {
+			value, err := strconv.ParseUint(p.currentToken().Literal, 16, 8)
+			if err != nil {
+				return nil, fmt.Errorf("invalid byte value: %s", p.currentToken().Literal)
+			}
+			data = append(data, byte(value))
+		} else if p.currentToken().Type == lexer.STRING {
+			// Convert string into bytes
+			data = append(data, []byte(p.currentToken().Literal)...)
+		}
+		p.advanceToken()
+
+		// Handle optional commas
+		if p.currentToken().Type == lexer.COMMA {
+			p.advanceToken()
+		}
+	}
+
+	return data, nil
 }
 
 func parseHex(token string) (uint8, uint8, error) {
