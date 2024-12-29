@@ -131,17 +131,17 @@ var mnemonics = map[string]TokenType{
 	"HLT": MNEMONIC,
 }
 
-// TODO: Split this into 8 and 16-bit registers.  We'll need to differentiate between the
-// two to parse registers that have 16-bit operands, eg, PUSH B.
 var registers = map[string]TokenType{
-	"A": REGISTER,
-	"B": REGISTER,
-	"C": REGISTER,
-	"D": REGISTER,
-	"E": REGISTER,
-	"H": REGISTER,
-	"L": REGISTER,
-	"M": REGISTER,
+	"A":   REGISTER,
+	"B":   REGISTER,
+	"C":   REGISTER,
+	"D":   REGISTER,
+	"E":   REGISTER,
+	"H":   REGISTER,
+	"L":   REGISTER,
+	"M":   REGISTER,
+	"SP":  REGISTER,
+	"PSW": REGISTER,
 }
 
 type Lexer struct {
@@ -163,7 +163,6 @@ func (l *Lexer) Lex() ([]Token, error) {
 		l.Tokens = append(l.Tokens, token)
 	}
 
-	// TODO: Do we need this?
 	l.Tokens = append(l.Tokens, Token{Type: EOF})
 
 	// TODO: Make Lex() function actually detect errors
@@ -181,8 +180,7 @@ func (l *Lexer) readChar() {
 }
 
 func (l *Lexer) NextToken() Token {
-	var token Token
-
+	token := Token{}
 	l.skipWhitespace()
 
 	switch l.currentChar {
@@ -239,7 +237,7 @@ func (l *Lexer) readNumber() string {
 		l.readChar() // consume 'x' or 'X'
 	}
 
-	// for isDigit(l.currentChar) || isHex(l.currentChar) {
+	// Read all the hex characters
 	for isHex(l.currentChar) {
 		l.readChar()
 	}
@@ -262,14 +260,12 @@ func (l *Lexer) readComment() string {
 
 func (l *Lexer) lookupToken(token string) TokenType {
 	token = strings.ToUpper(token)
-
 	if tokenType, exists := mnemonics[token]; exists {
 		return tokenType
 	}
 	if tokenType, exists := registers[token]; exists {
 		return tokenType
 	}
-
 	return LABEL
 }
 
