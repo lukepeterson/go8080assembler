@@ -32,7 +32,6 @@ func TestParser_Parse(t *testing.T) {
 				{Type: lexer.EOF},
 			},
 			wantBytecode: []byte{0x78, 0x4A, 0xC3, 0x01, 0x00},
-			wantErr:      false,
 		},
 		{
 			name: "multiple labels",
@@ -56,7 +55,6 @@ func TestParser_Parse(t *testing.T) {
 				{Type: lexer.EOF},
 			},
 			wantBytecode: []byte{0x78, 0xC3, 0x08, 0x00, 0x4A, 0xC3, 0x01, 0x00},
-			wantErr:      false,
 		},
 		{
 			name: "label defined after JMP",
@@ -76,7 +74,154 @@ func TestParser_Parse(t *testing.T) {
 				{Type: lexer.EOF},
 			},
 			wantBytecode: []byte{0x78, 0xC3, 0x05, 0x00, 0x4A},
-			wantErr:      false,
+		},
+		{
+			name: "MOV with valid source and destination registers",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "MOV"},
+				{Type: lexer.REGISTER, Literal: "A"},
+				{Type: lexer.COMMA, Literal: ","},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x78},
+		},
+		// TODO: Add all the other MOV instructions here to confirm all their bytecodes (64 in total)
+		{
+			name: "MOV with invalid source register",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "MOV"},
+				{Type: lexer.REGISTER, Literal: "X"},
+				{Type: lexer.COMMA, Literal: ","},
+				{Type: lexer.REGISTER, Literal: "A"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "MOV with invalid destination register",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "MOV"},
+				{Type: lexer.REGISTER, Literal: "A"},
+				{Type: lexer.COMMA, Literal: ","},
+				{Type: lexer.REGISTER, Literal: "X"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "MOV with missing comma",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "MOV"},
+				{Type: lexer.REGISTER, Literal: "X"},
+				{Type: lexer.REGISTER, Literal: "A"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "MOV with missing register operand one",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "MOV"},
+				{Type: lexer.NUMBER, Literal: "1"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "MOV with missing register operand two",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "MOV"},
+				{Type: lexer.REGISTER, Literal: "A"},
+				{Type: lexer.COMMA, Literal: ","},
+				{Type: lexer.NUMBER, Literal: "1"},
+			},
+			wantErr: true,
+		},
+
+		{
+			name: "MVI B, 0x55",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "MVI"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.COMMA, Literal: ","},
+				{Type: lexer.NUMBER, Literal: "0x55"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x06, 0x55},
+		},
+		{
+			name: "MVI C, 0x55",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "MVI"},
+				{Type: lexer.REGISTER, Literal: "C"},
+				{Type: lexer.COMMA, Literal: ","},
+				{Type: lexer.NUMBER, Literal: "0x55"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x0E, 0x55},
+		},
+		{
+			name: "MVI D, 0x55",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "MVI"},
+				{Type: lexer.REGISTER, Literal: "D"},
+				{Type: lexer.COMMA, Literal: ","},
+				{Type: lexer.NUMBER, Literal: "0x55"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x16, 0x55},
+		},
+		{
+			name: "MVI E, 0x55",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "MVI"},
+				{Type: lexer.REGISTER, Literal: "E"},
+				{Type: lexer.COMMA, Literal: ","},
+				{Type: lexer.NUMBER, Literal: "0x55"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x1E, 0x55},
+		},
+		{
+			name: "MVI H, 0x55",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "MVI"},
+				{Type: lexer.REGISTER, Literal: "H"},
+				{Type: lexer.COMMA, Literal: ","},
+				{Type: lexer.NUMBER, Literal: "0x55"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x26, 0x55},
+		},
+		{
+			name: "MVI L, 0x55",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "MVI"},
+				{Type: lexer.REGISTER, Literal: "L"},
+				{Type: lexer.COMMA, Literal: ","},
+				{Type: lexer.NUMBER, Literal: "0x55"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x2E, 0x55},
+		},
+		{
+			name: "MVI M, 0x55",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "MVI"},
+				{Type: lexer.REGISTER, Literal: "M"},
+				{Type: lexer.COMMA, Literal: ","},
+				{Type: lexer.NUMBER, Literal: "0x55"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x36, 0x55},
+		},
+		{
+			name: "MVI A, 0x55",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "MVI"},
+				{Type: lexer.REGISTER, Literal: "A"},
+				{Type: lexer.COMMA, Literal: ","},
+				{Type: lexer.NUMBER, Literal: "0x55"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x3E, 0x55},
 		},
 	}
 	for _, tt := range tests {

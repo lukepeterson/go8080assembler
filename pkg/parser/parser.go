@@ -81,20 +81,24 @@ func (p *Parser) Parse() ([]byte, error) {
 	return p.bytecode, nil
 }
 
+type parseFunc func(*Parser) ([]byte, error)
+
+var instructionMap = map[string]parseFunc{
+	"MOV": (*Parser).parseMOV,
+	"MVI": (*Parser).parseMVI,
+	"JMP": (*Parser).parseJMP,
+	"DB":  (*Parser).parseDB,
+}
+
 func (p *Parser) parseInstruction() ([]byte, error) {
 	instruction := p.currentToken().Literal
 	p.advanceToken()
 
-	switch instruction {
-	case "MOV":
-		return p.parseMOV()
-	case "JMP":
-		return p.parseJMP()
-	case "DB":
-		return p.parseDB()
-	default:
+	parseFunc, exists := instructionMap[instruction]
+	if !exists {
 		return nil, fmt.Errorf("unknown instruction: %s", instruction)
 	}
+	return parseFunc(p)
 }
 
 func (p *Parser) parseMOV() ([]byte, error) {
@@ -119,21 +123,70 @@ func (p *Parser) parseMOV() ([]byte, error) {
 
 func generateMOVHex(src, dest string) ([]byte, error) {
 	registerMap := map[string]byte{
-		"A": 0x07, "B": 0x00, "C": 0x01, "D": 0x02, "E": 0x03, "H": 0x04, "L": 0x05, "M": 0x06,
+		"B": 0x00, "C": 0x01, "D": 0x02, "E": 0x03, "H": 0x04, "L": 0x05, "M": 0x06, "A": 0x07,
 	}
 
 	srcRegister, valid := registerMap[src]
 	if !valid {
-		return nil, fmt.Errorf("invalid source register in MOV: %s", src)
+		return nil, fmt.Errorf("invalid source register for MOV: %s", src)
 	}
 
 	destRegister, valid := registerMap[dest]
 	if !valid {
-		return nil, fmt.Errorf("invalid destination register in MOV: %s", dest)
+		return nil, fmt.Errorf("invalid destination register for MOV: %s", dest)
 	}
 
+	// TODO: This is likely common to other instructions - split this apart when you have more examples
 	opcode := byte(0x40) | (destRegister << 3) | srcRegister
 	return []byte{opcode}, nil
+}
+
+func (p *Parser) parseMVI() ([]byte, error) {
+	if p.currentToken().Type != lexer.REGISTER {
+		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
+	}
+	dest := p.currentToken().Literal
+	p.advanceToken()
+
+	if p.currentToken().Type != lexer.COMMA {
+		return nil, fmt.Errorf("expected comma, got: %s", p.currentToken().Literal)
+	}
+	p.advanceToken()
+
+	if p.currentToken().Type != lexer.NUMBER {
+		return nil, fmt.Errorf("expected number, got: %s", p.currentToken().Literal)
+	}
+	// src := p.currentToken().Literal
+
+	return generateMVIHex(dest, p.currentToken().Literal)
+}
+
+func generateMVIHex(dest string, data string) ([]byte, error) {
+	// TODO: Move this global
+	registerMap := map[string]byte{
+		"B": 0x00, "C": 0x01, "D": 0x02, "E": 0x03, "H": 0x04, "L": 0x05, "M": 0x06, "A": 0x07,
+	}
+
+	// srcRegister, valid := registerMap[src]
+	// if !valid {
+	// 	return nil, fmt.Errorf("invalid source register for MOV: %s", src)
+	// }
+
+	destRegister, valid := registerMap[dest]
+	if !valid {
+		return nil, fmt.Errorf("invalid destination register for MOV: %s", dest)
+	}
+
+	_, lowByte, err := parseHex(data)
+	if err != nil {
+		return nil, err
+	}
+
+	// opcode := byte(0x40) | (destRegister << 3) | srcRegister
+	opcode := byte(0x06) | (destRegister << 3)
+	return []byte{opcode, lowByte}, nil
+	// return []byte{}, nil
+
 }
 
 func (p *Parser) parseJMP() ([]byte, error) {
@@ -141,6 +194,7 @@ func (p *Parser) parseJMP() ([]byte, error) {
 	if p.currentToken().Type == lexer.NUMBER {
 		highByte, lowByte, err := parseHex(p.currentToken().Literal)
 		if err != nil {
+			// TODO: Return here instead of print
 			fmt.Printf("err: %v\n", err)
 		}
 
@@ -176,7 +230,7 @@ func (p *Parser) parseDB() ([]byte, error) {
 		}
 		p.advanceToken()
 
-		// Handle optional commas
+		// Handle optional commas???
 		if p.currentToken().Type == lexer.COMMA {
 			p.advanceToken()
 		}
