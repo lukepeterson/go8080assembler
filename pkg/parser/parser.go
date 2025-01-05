@@ -88,6 +88,7 @@ var instructionMap = map[string]parseFunc{
 	"MVI":  (*Parser).parseMVI,
 	"LXI":  (*Parser).parseLXI,
 	"STAX": (*Parser).parseSTAX,
+	"LDAX": (*Parser).parseLDAX,
 	"JMP":  (*Parser).parseJMP,
 	"DB":   (*Parser).parseDB,
 }
@@ -238,6 +239,30 @@ func generateSTAXHex(dest string) ([]byte, error) {
 	}
 
 	opcode := byte(0x02) | (destRegister << 4)
+	return []byte{opcode}, nil
+}
+
+func (p *Parser) parseLDAX() ([]byte, error) {
+	if p.currentToken().Type != lexer.REGISTER {
+		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
+	}
+	dest := p.currentToken().Literal
+	p.advanceToken()
+
+	return generateLDAXHex(dest)
+}
+
+func generateLDAXHex(dest string) ([]byte, error) {
+	var registerMap = map[string]byte{
+		"B": 0x00, "D": 0x01,
+	}
+
+	destRegister, valid := registerMap[dest]
+	if !valid {
+		return nil, fmt.Errorf("invalid destination register for LDAX: %s", dest)
+	}
+
+	opcode := byte(0x0A) | (destRegister << 4)
 	return []byte{opcode}, nil
 }
 
