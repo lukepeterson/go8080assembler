@@ -86,8 +86,17 @@ type parseFunc func(*Parser) ([]byte, error)
 var instructionMap = map[string]parseFunc{
 	"MOV": (*Parser).parseMOV,
 	"MVI": (*Parser).parseMVI,
+	"LXI": (*Parser).parseLXI,
 	"JMP": (*Parser).parseJMP,
 	"DB":  (*Parser).parseDB,
+}
+
+var registerMap8 = map[string]byte{
+	"B": 0x00, "C": 0x01, "D": 0x02, "E": 0x03, "H": 0x04, "L": 0x05, "M": 0x06, "A": 0x07,
+}
+
+var registerMap16 = map[string]byte{
+	"B": 0x00, "D": 0x01, "H": 0x02, "SP": 0x03,
 }
 
 func (p *Parser) parseInstruction() ([]byte, error) {
@@ -122,16 +131,12 @@ func (p *Parser) parseMOV() ([]byte, error) {
 }
 
 func generateMOVHex(src, dest string) ([]byte, error) {
-	registerMap := map[string]byte{
-		"B": 0x00, "C": 0x01, "D": 0x02, "E": 0x03, "H": 0x04, "L": 0x05, "M": 0x06, "A": 0x07,
-	}
-
-	srcRegister, valid := registerMap[src]
+	srcRegister, valid := registerMap8[src]
 	if !valid {
 		return nil, fmt.Errorf("invalid source register for MOV: %s", src)
 	}
 
-	destRegister, valid := registerMap[dest]
+	destRegister, valid := registerMap8[dest]
 	if !valid {
 		return nil, fmt.Errorf("invalid destination register for MOV: %s", dest)
 	}
@@ -156,23 +161,13 @@ func (p *Parser) parseMVI() ([]byte, error) {
 	if p.currentToken().Type != lexer.NUMBER {
 		return nil, fmt.Errorf("expected number, got: %s", p.currentToken().Literal)
 	}
-	// src := p.currentToken().Literal
+	byteToStore := p.currentToken().Literal
 
-	return generateMVIHex(dest, p.currentToken().Literal)
+	return generateMVIHex(dest, byteToStore)
 }
 
 func generateMVIHex(dest string, data string) ([]byte, error) {
-	// TODO: Move this global
-	registerMap := map[string]byte{
-		"B": 0x00, "C": 0x01, "D": 0x02, "E": 0x03, "H": 0x04, "L": 0x05, "M": 0x06, "A": 0x07,
-	}
-
-	// srcRegister, valid := registerMap[src]
-	// if !valid {
-	// 	return nil, fmt.Errorf("invalid source register for MOV: %s", src)
-	// }
-
-	destRegister, valid := registerMap[dest]
+	destRegister, valid := registerMap8[dest]
 	if !valid {
 		return nil, fmt.Errorf("invalid destination register for MOV: %s", dest)
 	}
@@ -182,11 +177,44 @@ func generateMVIHex(dest string, data string) ([]byte, error) {
 		return nil, err
 	}
 
-	// opcode := byte(0x40) | (destRegister << 3) | srcRegister
 	opcode := byte(0x06) | (destRegister << 3)
 	return []byte{opcode, lowByte}, nil
-	// return []byte{}, nil
+}
 
+func (p *Parser) parseLXI() ([]byte, error) {
+	if p.currentToken().Type != lexer.REGISTER {
+		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
+	}
+	dest := p.currentToken().Literal
+	p.advanceToken()
+
+	if p.currentToken().Type != lexer.COMMA {
+		return nil, fmt.Errorf("expected comma, got: %s", p.currentToken().Literal)
+	}
+	p.advanceToken()
+
+	if p.currentToken().Type != lexer.NUMBER {
+		return nil, fmt.Errorf("expected number, got: %s", p.currentToken().Literal)
+	}
+	wordToStore := p.currentToken().Literal
+
+	return generateLXIHex(dest, wordToStore)
+}
+
+func generateLXIHex(dest string, data string) ([]byte, error) {
+
+	destRegister, valid := registerMap16[dest]
+	if !valid {
+		return nil, fmt.Errorf("invalid destination register for LXI: %s", dest)
+	}
+
+	highByte, lowByte, err := parseHex(data)
+	if err != nil {
+		return nil, err
+	}
+
+	opcode := byte(0x01) | (destRegister << 4)
+	return []byte{opcode, lowByte, highByte}, nil
 }
 
 func (p *Parser) parseJMP() ([]byte, error) {
