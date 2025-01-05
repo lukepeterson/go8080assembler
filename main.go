@@ -37,22 +37,22 @@ func main() {
 	// 		`
 
 	input := `
-; Simple 8080 Assembly Program to Test Lexer
-START:      LXI H, MSG          ; Load the address of MSG into HL
-            MVI C, 9            ; Load 9 (print string call) into register C
-            CALL PRINT          ; Call the PRINT subroutine
+	; Simple 8080 Assembly Program to Test Lexer
+	START:      LXI H, MSG          ; Load the address of MSG into HL
+	            MVI C, 9            ; Load 9 (print string call) into register C
+	            CALL PRINT          ; Call the PRINT subroutine
 
-            HLT                 ; Halt the program
+	            HLT                 ; Halt the program
 
-PRINT:      MOV A, M            ; Load the character at HL into A
-            ORA A               ; Check if the character is null (A OR A sets Z flag if A is 0)
-            RZ                  ; Return if zero (end of string)
-            OUT 1               ; Output the character (assumes device 1 is stdout)
-            INX H               ; Increment HL to point to the next character
-            JMP PRINT           ; Repeat the process
+	PRINT:      MOV A, M            ; Load the character at HL into A
+	            ORA A               ; Check if the character is null (A OR A sets Z flag if A is 0)
+	            RZ                  ; Return if zero (end of string)
+	            OUT 1               ; Output the character (assumes device 1 is stdout)
+	            INX H               ; Increment HL to point to the next character
+	            JMP PRINT           ; Repeat the process
 
-MSG:        DB 'Hello, 8080!', 0 ; Message string (null-terminated)
-	`
+	MSG:        DB 'Hello, 8080!', 0 ; Message string (null-terminated)
+		`
 
 	// Lex
 	l := lexer.New(input)

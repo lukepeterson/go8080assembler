@@ -290,6 +290,27 @@ func TestParser_Parse(t *testing.T) {
 			wantBytecode: []byte{0x21, 0x55, 0x44},
 		},
 		{
+			name: "LXI H, MSG (load address from label)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "LXI"},
+				{Type: lexer.REGISTER, Literal: "H"},
+				{Type: lexer.COMMA, Literal: ","},
+				{Type: lexer.LABEL, Literal: "MSG"},
+				{Type: lexer.LABEL, Literal: "MSG"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.MNEMONIC, Literal: "DB"},
+				{Type: lexer.STRING, Literal: "Hello"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x21, 0x03, 0x00, 0x48, 0x65, 0x6C, 0x6C, 0x6F},
+		},
+
+		// {MNEMONIC LXI} {REGISTER H} {COMMA ,} {LABEL MSG} {LABEL MSG} {COLON :} {MNEMONIC DB} {STRING Hello} {EOF }
+
+		// LXI H, MSG          ; Load the address of MSG into HL
+		// MSG:  DB 'Hello'
+
+		{
 			name: "LXI L, 0x4455 (invalid destination register)",
 			tokens: []lexer.Token{
 				{Type: lexer.MNEMONIC, Literal: "LXI"},
@@ -364,6 +385,15 @@ func TestParser_Parse(t *testing.T) {
 				{Type: lexer.EOF},
 			},
 			wantErr: true,
+		},
+		{
+			name: "DB Hello",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DB"},
+				{Type: lexer.STRING, Literal: "Hello"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x48, 0x65, 0x6C, 0x6C, 0x6F},
 		},
 	}
 	for _, tt := range tests {

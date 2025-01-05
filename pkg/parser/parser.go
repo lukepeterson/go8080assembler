@@ -195,28 +195,47 @@ func (p *Parser) parseLXI() ([]byte, error) {
 	}
 	p.advanceToken()
 
-	if p.currentToken().Type != lexer.NUMBER {
-		return nil, fmt.Errorf("expected number, got: %s", p.currentToken().Literal)
-	}
-	wordToStore := p.currentToken().Literal
-
-	return generateLXIHex(dest, wordToStore)
-}
-
-func generateLXIHex(dest string, data string) ([]byte, error) {
 	destRegister, valid := registerMap16[dest]
 	if !valid {
 		return nil, fmt.Errorf("invalid destination register for LXI: %s", dest)
 	}
 
-	highByte, lowByte, err := parseHex(data)
-	if err != nil {
-		return nil, err
+	if p.currentToken().Type == lexer.NUMBER {
+		highByte, lowByte, err := parseHex(p.currentToken().Literal)
+		if err != nil {
+			return nil, err
+		}
+
+		// TODO: Reduce the duplication here
+		opcode := byte(0x01) | (destRegister << 4)
+		return []byte{opcode, lowByte, highByte}, nil
 	}
 
+	if p.currentToken().Type == lexer.LABEL {
+		p.labelReferences[p.currentToken().Literal] = uint16(len(p.bytecode) + 1)
+	}
+	// TODO: Check for errors here
+	// TODO: Reduce the duplication with the opcode code
+	// TODO: Switch this out for generateLXIHex (if possible?)
+
 	opcode := byte(0x01) | (destRegister << 4)
-	return []byte{opcode, lowByte, highByte}, nil
+	return []byte{opcode, 0x00, 0x00}, nil
 }
+
+// func generateLXIHex(dest string, data string) ([]byte, error) {
+// 	destRegister, valid := registerMap16[dest]
+// 	if !valid {
+// 		return nil, fmt.Errorf("invalid destination register for LXI: %s", dest)
+// 	}
+
+// 	highByte, lowByte, err := parseHex(data)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	opcode := byte(0x01) | (destRegister << 4)
+// 	return []byte{opcode, lowByte, highByte}, nil
+// }
 
 func (p *Parser) parseSTAX() ([]byte, error) {
 	if p.currentToken().Type != lexer.REGISTER {
