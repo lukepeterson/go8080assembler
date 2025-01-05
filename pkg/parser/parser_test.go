@@ -311,6 +311,33 @@ func TestParser_Parse(t *testing.T) {
 			},
 			wantBytecode: []byte{0x31, 0x55, 0x44},
 		},
+		{
+			name: "STAX B",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "STAX"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x02},
+		},
+		{
+			name: "STAX D",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "STAX"},
+				{Type: lexer.REGISTER, Literal: "D"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x12},
+		},
+		{
+			name: "STAX H",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "STAX"},
+				{Type: lexer.REGISTER, Literal: "H"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

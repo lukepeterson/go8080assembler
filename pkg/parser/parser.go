@@ -84,11 +84,12 @@ func (p *Parser) Parse() ([]byte, error) {
 type parseFunc func(*Parser) ([]byte, error)
 
 var instructionMap = map[string]parseFunc{
-	"MOV": (*Parser).parseMOV,
-	"MVI": (*Parser).parseMVI,
-	"LXI": (*Parser).parseLXI,
-	"JMP": (*Parser).parseJMP,
-	"DB":  (*Parser).parseDB,
+	"MOV":  (*Parser).parseMOV,
+	"MVI":  (*Parser).parseMVI,
+	"LXI":  (*Parser).parseLXI,
+	"STAX": (*Parser).parseSTAX,
+	"JMP":  (*Parser).parseJMP,
+	"DB":   (*Parser).parseDB,
 }
 
 var registerMap8 = map[string]byte{
@@ -202,7 +203,6 @@ func (p *Parser) parseLXI() ([]byte, error) {
 }
 
 func generateLXIHex(dest string, data string) ([]byte, error) {
-
 	destRegister, valid := registerMap16[dest]
 	if !valid {
 		return nil, fmt.Errorf("invalid destination register for LXI: %s", dest)
@@ -215,6 +215,30 @@ func generateLXIHex(dest string, data string) ([]byte, error) {
 
 	opcode := byte(0x01) | (destRegister << 4)
 	return []byte{opcode, lowByte, highByte}, nil
+}
+
+func (p *Parser) parseSTAX() ([]byte, error) {
+	if p.currentToken().Type != lexer.REGISTER {
+		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
+	}
+	dest := p.currentToken().Literal
+	p.advanceToken()
+
+	return generateSTAXHex(dest)
+}
+
+func generateSTAXHex(dest string) ([]byte, error) {
+	var registerMap = map[string]byte{
+		"B": 0x00, "D": 0x01,
+	}
+
+	destRegister, valid := registerMap[dest]
+	if !valid {
+		return nil, fmt.Errorf("invalid destination register for STAX: %s", dest)
+	}
+
+	opcode := byte(0x02) | (destRegister << 4)
+	return []byte{opcode}, nil
 }
 
 func (p *Parser) parseJMP() ([]byte, error) {
