@@ -299,17 +299,11 @@ func TestParser_Parse(t *testing.T) {
 				{Type: lexer.LABEL, Literal: "MSG"},
 				{Type: lexer.COLON, Literal: ":"},
 				{Type: lexer.MNEMONIC, Literal: "DB"},
-				{Type: lexer.STRING, Literal: "Hello"},
+				{Type: lexer.STRING, Literal: "Test"},
 				{Type: lexer.EOF},
 			},
-			wantBytecode: []byte{0x21, 0x03, 0x00, 0x48, 0x65, 0x6C, 0x6C, 0x6F},
+			wantBytecode: []byte{0x21, 0x03, 0x00, 0x54, 0x65, 0x73, 0x74},
 		},
-
-		// {MNEMONIC LXI} {REGISTER H} {COMMA ,} {LABEL MSG} {LABEL MSG} {COLON :} {MNEMONIC DB} {STRING Hello} {EOF }
-
-		// LXI H, MSG          ; Load the address of MSG into HL
-		// MSG:  DB 'Hello'
-
 		{
 			name: "LXI L, 0x4455 (invalid destination register)",
 			tokens: []lexer.Token{
@@ -394,6 +388,50 @@ func TestParser_Parse(t *testing.T) {
 				{Type: lexer.EOF},
 			},
 			wantBytecode: []byte{0x48, 0x65, 0x6C, 0x6C, 0x6F},
+		},
+		{
+			name: "STA 0x4455",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "STA"},
+				{Type: lexer.NUMBER, Literal: "0x4455"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x32, 0x55, 0x44},
+		},
+		{
+			name: "STA MSG",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "STA"},
+				{Type: lexer.LABEL, Literal: "MSG"},
+				{Type: lexer.LABEL, Literal: "MSG"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.MNEMONIC, Literal: "DB"},
+				{Type: lexer.STRING, Literal: "Test"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x32, 0x03, 0x00, 0x54, 0x65, 0x73, 0x74},
+		},
+		{
+			name: "LDA 0x4455",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "LDA"},
+				{Type: lexer.NUMBER, Literal: "0x4455"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x3A, 0x55, 0x44},
+		},
+		{
+			name: "LDA MSG",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "LDA"},
+				{Type: lexer.LABEL, Literal: "MSG"},
+				{Type: lexer.LABEL, Literal: "MSG"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.MNEMONIC, Literal: "DB"},
+				{Type: lexer.STRING, Literal: "Test"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x3A, 0x03, 0x00, 0x54, 0x65, 0x73, 0x74},
 		},
 	}
 	for _, tt := range tests {

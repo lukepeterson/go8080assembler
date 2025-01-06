@@ -89,6 +89,8 @@ var instructionMap = map[string]parseFunc{
 	"LXI":  (*Parser).parseLXI,
 	"STAX": (*Parser).parseSTAX,
 	"LDAX": (*Parser).parseLDAX,
+	"STA":  (*Parser).parseSTA,
+	"LDA":  (*Parser).parseLDA,
 	"JMP":  (*Parser).parseJMP,
 	"DB":   (*Parser).parseDB,
 }
@@ -133,17 +135,16 @@ func (p *Parser) parseMOV() ([]byte, error) {
 }
 
 func generateMOVHex(src, dest string) ([]byte, error) {
-	srcRegister, valid := registerMap8[src]
-	if !valid {
+	srcRegister, exists := registerMap8[src]
+	if !exists {
 		return nil, fmt.Errorf("invalid source register for MOV: %s", src)
 	}
 
-	destRegister, valid := registerMap8[dest]
-	if !valid {
+	destRegister, exists := registerMap8[dest]
+	if !exists {
 		return nil, fmt.Errorf("invalid destination register for MOV: %s", dest)
 	}
 
-	// TODO: This is likely common to other instructions - split this apart when you have more examples
 	opcode := byte(0x40) | (destRegister << 3) | srcRegister
 	return []byte{opcode}, nil
 }
@@ -169,8 +170,8 @@ func (p *Parser) parseMVI() ([]byte, error) {
 }
 
 func generateMVIHex(dest string, data string) ([]byte, error) {
-	destRegister, valid := registerMap8[dest]
-	if !valid {
+	destRegister, exists := registerMap8[dest]
+	if !exists {
 		return nil, fmt.Errorf("invalid destination register for MOV: %s", dest)
 	}
 
@@ -195,47 +196,27 @@ func (p *Parser) parseLXI() ([]byte, error) {
 	}
 	p.advanceToken()
 
-	destRegister, valid := registerMap16[dest]
-	if !valid {
+	destRegister, exists := registerMap16[dest]
+	if !exists {
 		return nil, fmt.Errorf("invalid destination register for LXI: %s", dest)
 	}
+	opcode := byte(0x01) | (destRegister << 4)
 
 	if p.currentToken().Type == lexer.NUMBER {
 		highByte, lowByte, err := parseHex(p.currentToken().Literal)
 		if err != nil {
 			return nil, err
 		}
-
-		// TODO: Reduce the duplication here
-		opcode := byte(0x01) | (destRegister << 4)
 		return []byte{opcode, lowByte, highByte}, nil
 	}
 
 	if p.currentToken().Type == lexer.LABEL {
 		p.labelReferences[p.currentToken().Literal] = uint16(len(p.bytecode) + 1)
+		return []byte{opcode, 0x00, 0x00}, nil
 	}
-	// TODO: Check for errors here
-	// TODO: Reduce the duplication with the opcode code
-	// TODO: Switch this out for generateLXIHex (if possible?)
 
-	opcode := byte(0x01) | (destRegister << 4)
-	return []byte{opcode, 0x00, 0x00}, nil
+	return nil, fmt.Errorf("expected address or label, got: %s", p.currentToken().Type)
 }
-
-// func generateLXIHex(dest string, data string) ([]byte, error) {
-// 	destRegister, valid := registerMap16[dest]
-// 	if !valid {
-// 		return nil, fmt.Errorf("invalid destination register for LXI: %s", dest)
-// 	}
-
-// 	highByte, lowByte, err := parseHex(data)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	opcode := byte(0x01) | (destRegister << 4)
-// 	return []byte{opcode, lowByte, highByte}, nil
-// }
 
 func (p *Parser) parseSTAX() ([]byte, error) {
 	if p.currentToken().Type != lexer.REGISTER {
@@ -252,8 +233,8 @@ func generateSTAXHex(dest string) ([]byte, error) {
 		"B": 0x00, "D": 0x01,
 	}
 
-	destRegister, valid := registerMap[dest]
-	if !valid {
+	destRegister, exists := registerMap[dest]
+	if !exists {
 		return nil, fmt.Errorf("invalid destination register for STAX: %s", dest)
 	}
 
@@ -276,8 +257,8 @@ func generateLDAXHex(dest string) ([]byte, error) {
 		"B": 0x00, "D": 0x01,
 	}
 
-	destRegister, valid := registerMap[dest]
-	if !valid {
+	destRegister, exists := registerMap[dest]
+	if !exists {
 		return nil, fmt.Errorf("invalid destination register for LDAX: %s", dest)
 	}
 
@@ -285,25 +266,56 @@ func generateLDAXHex(dest string) ([]byte, error) {
 	return []byte{opcode}, nil
 }
 
+func (p *Parser) parseSTA() ([]byte, error) {
+	opcode := byte(0x32)
+
+	if p.currentToken().Type == lexer.NUMBER {
+		highByte, lowByte, err := parseHex(p.currentToken().Literal)
+		if err != nil {
+			return nil, err
+		}
+		return []byte{opcode, lowByte, highByte}, nil
+	}
+
+	if p.currentToken().Type == lexer.LABEL {
+		p.labelReferences[p.currentToken().Literal] = uint16(len(p.bytecode) + 1)
+		return []byte{opcode, 0x00, 0x00}, nil
+	}
+
+	return nil, fmt.Errorf("expected address or label, got: %s", p.currentToken().Type)
+}
+
+func (p *Parser) parseLDA() ([]byte, error) {
+	opcode := byte(0x3A)
+
+	if p.currentToken().Type == lexer.NUMBER {
+		highByte, lowByte, err := parseHex(p.currentToken().Literal)
+		if err != nil {
+			return nil, err
+		}
+		return []byte{opcode, lowByte, highByte}, nil
+	}
+
+	if p.currentToken().Type == lexer.LABEL {
+		p.labelReferences[p.currentToken().Literal] = uint16(len(p.bytecode) + 1)
+		return []byte{opcode, 0x00, 0x00}, nil
+	}
+
+	return nil, fmt.Errorf("expected address or label, got: %s", p.currentToken().Type)
+}
+
 func (p *Parser) parseJMP() ([]byte, error) {
 
 	if p.currentToken().Type == lexer.NUMBER {
 		highByte, lowByte, err := parseHex(p.currentToken().Literal)
 		if err != nil {
-			// TODO: Return here instead of print
-			fmt.Printf("err: %v\n", err)
+			return nil, err
 		}
-
 		return []byte{0xC3, lowByte, highByte}, nil
 	}
 
-	// If the destination isn't a number, assume it's a label
 	if p.currentToken().Type == lexer.LABEL {
-
 		p.labelReferences[p.currentToken().Literal] = uint16(len(p.bytecode) + 1)
-
-		// Labels can be used before they exist, so we use 0x0000 as a placeholder
-		// until we know all the label locations.
 		return []byte{0xC3, 0x00, 0x00}, nil
 	}
 
