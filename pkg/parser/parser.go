@@ -94,6 +94,9 @@ var instructionMap = map[string]parseFunc{
 	"LDA":  (*Parser).parseDirectAddressInstruction,
 	"SHLD": (*Parser).parseDirectAddressInstruction,
 	"LHLD": (*Parser).parseDirectAddressInstruction,
+	"XCHG": (*Parser).parseXCHG,
+	"PUSH": (*Parser).parsePUSH,
+	"POP":  (*Parser).parsePOP,
 
 	"JMP": (*Parser).parseJMP,
 	"DB":  (*Parser).parseDB,
@@ -226,6 +229,7 @@ func (p *Parser) parseLXI() ([]byte, error) {
 	return nil, fmt.Errorf("expected address or label, got: %s", p.currentToken().Type)
 }
 
+// TODO: Combine STAX and LDAX instructions
 func (p *Parser) parseSTAX() ([]byte, error) {
 	p.advanceToken()
 
@@ -306,6 +310,65 @@ func (p *Parser) parseDirectAddressInstruction() ([]byte, error) {
 	}
 
 	return nil, fmt.Errorf("expected address or label, got: %s", p.currentToken().Type)
+}
+
+// TODO: Refactor all single byte instructions into one function
+func (p *Parser) parseXCHG() ([]byte, error) {
+	p.advanceToken()
+	return []byte{0xEB}, nil
+}
+
+// TODO: Refactor PUSH and POP into one function as the only difference is the opcode.
+func (p *Parser) parsePUSH() ([]byte, error) {
+	p.advanceToken()
+
+	if p.currentToken().Type != lexer.REGISTER {
+		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
+	}
+	dest := p.currentToken().Literal
+	p.advanceToken()
+
+	return generatePUSHHex(dest)
+}
+
+func generatePUSHHex(dest string) ([]byte, error) {
+	var registerMap = map[string]byte{
+		"B": 0x00, "D": 0x01, "H": 0x02, "PSW": 0x03,
+	}
+
+	destRegister, exists := registerMap[dest]
+	if !exists {
+		return nil, fmt.Errorf("invalid destination register for PUSH: %s", dest)
+	}
+
+	opcode := byte(0xC5) | (destRegister << 4)
+	return []byte{opcode}, nil
+}
+
+func (p *Parser) parsePOP() ([]byte, error) {
+	p.advanceToken()
+
+	if p.currentToken().Type != lexer.REGISTER {
+		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
+	}
+	dest := p.currentToken().Literal
+	p.advanceToken()
+
+	return generatePOPHex(dest)
+}
+
+func generatePOPHex(dest string) ([]byte, error) {
+	var registerMap = map[string]byte{
+		"B": 0x00, "D": 0x01, "H": 0x02, "PSW": 0x03,
+	}
+
+	destRegister, exists := registerMap[dest]
+	if !exists {
+		return nil, fmt.Errorf("invalid destination register for POP: %s", dest)
+	}
+
+	opcode := byte(0xC1) | (destRegister << 4)
+	return []byte{opcode}, nil
 }
 
 func (p *Parser) parseJMP() ([]byte, error) {

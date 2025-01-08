@@ -1125,6 +1125,175 @@ func TestParser_Parse(t *testing.T) {
 			},
 			wantBytecode: []byte{0x3A, 0x03, 0x00, 0x54, 0x65, 0x73, 0x74},
 		},
+		{
+			name: "XCHG",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "XCHG"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xEB},
+		},
+		{
+			name: "PUSH B",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "PUSH"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xC5},
+		},
+		{
+			name: "PUSH C (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "PUSH"},
+				{Type: lexer.REGISTER, Literal: "C"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "PUSH D",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "PUSH"},
+				{Type: lexer.REGISTER, Literal: "D"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xD5},
+		},
+		{
+			name: "PUSH E (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "PUSH"},
+				{Type: lexer.REGISTER, Literal: "E"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "PUSH H",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "PUSH"},
+				{Type: lexer.REGISTER, Literal: "H"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xE5},
+		},
+		{
+			name: "PUSH L (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "PUSH"},
+				{Type: lexer.REGISTER, Literal: "L"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "PUSH M (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "PUSH"},
+				{Type: lexer.REGISTER, Literal: "M"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "PUSH A (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "PUSH"},
+				{Type: lexer.REGISTER, Literal: "A"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "PUSH PSW",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "PUSH"},
+				{Type: lexer.REGISTER, Literal: "PSW"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xF5},
+		}, {
+			name: "POP B",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "POP"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xC1},
+		},
+		{
+			name: "POP C (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "POP"},
+				{Type: lexer.REGISTER, Literal: "C"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "POP D",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "POP"},
+				{Type: lexer.REGISTER, Literal: "D"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xD1},
+		},
+		{
+			name: "POP E (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "POP"},
+				{Type: lexer.REGISTER, Literal: "E"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "POP H",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "POP"},
+				{Type: lexer.REGISTER, Literal: "H"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xE1},
+		},
+		{
+			name: "POP L (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "POP"},
+				{Type: lexer.REGISTER, Literal: "L"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "POP M (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "POP"},
+				{Type: lexer.REGISTER, Literal: "M"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "POP A (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "POP"},
+				{Type: lexer.REGISTER, Literal: "A"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "POP PSW",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "POP"},
+				{Type: lexer.REGISTER, Literal: "PSW"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xF1},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

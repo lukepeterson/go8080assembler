@@ -93,7 +93,7 @@ var instructionSet = map[string]Instruction{
 	// "LDA":    {Opcode: 0x3A, Length: 3},
 	// "SHLD": {Opcode: 0x22, Length: 3},
 	// "LHLD": {Opcode: 0x2A, Length: 3},
-	"XCHG": {Opcode: 0xEB, Length: 1},
+	// "XCHG": {Opcode: 0xEB, Length: 1},
 
 	// STACK OPERATIONS
 	"PUSH B":   {Opcode: 0xC5, Length: 1},
