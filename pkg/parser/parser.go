@@ -89,10 +89,14 @@ var instructionMap = map[string]parseFunc{
 	"LXI":  (*Parser).parseLXI,
 	"STAX": (*Parser).parseSTAX,
 	"LDAX": (*Parser).parseLDAX,
-	"STA":  (*Parser).parseSTA,
-	"LDA":  (*Parser).parseLDA,
-	"JMP":  (*Parser).parseJMP,
-	"DB":   (*Parser).parseDB,
+
+	"STA":  (*Parser).parseDirectAddressInstruction,
+	"LDA":  (*Parser).parseDirectAddressInstruction,
+	"SHLD": (*Parser).parseDirectAddressInstruction,
+	"LHLD": (*Parser).parseDirectAddressInstruction,
+
+	"JMP": (*Parser).parseJMP,
+	"DB":  (*Parser).parseDB,
 }
 
 var registerMap8 = map[string]byte{
@@ -105,16 +109,16 @@ var registerMap16 = map[string]byte{
 
 func (p *Parser) parseInstruction() ([]byte, error) {
 	instruction := p.currentToken().Literal
-	p.advanceToken()
-
-	parseFunc, exists := instructionMap[instruction]
-	if !exists {
+	parseFunc, instructionExists := instructionMap[instruction]
+	if !instructionExists {
 		return nil, fmt.Errorf("unknown instruction: %s", instruction)
 	}
 	return parseFunc(p)
 }
 
 func (p *Parser) parseMOV() ([]byte, error) {
+	p.advanceToken()
+
 	if p.currentToken().Type != lexer.REGISTER {
 		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
 	}
@@ -150,6 +154,8 @@ func generateMOVHex(src, dest string) ([]byte, error) {
 }
 
 func (p *Parser) parseMVI() ([]byte, error) {
+	p.advanceToken()
+
 	if p.currentToken().Type != lexer.REGISTER {
 		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
 	}
@@ -185,6 +191,8 @@ func generateMVIHex(dest string, data string) ([]byte, error) {
 }
 
 func (p *Parser) parseLXI() ([]byte, error) {
+	p.advanceToken()
+
 	if p.currentToken().Type != lexer.REGISTER {
 		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
 	}
@@ -219,6 +227,8 @@ func (p *Parser) parseLXI() ([]byte, error) {
 }
 
 func (p *Parser) parseSTAX() ([]byte, error) {
+	p.advanceToken()
+
 	if p.currentToken().Type != lexer.REGISTER {
 		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
 	}
@@ -243,6 +253,8 @@ func generateSTAXHex(dest string) ([]byte, error) {
 }
 
 func (p *Parser) parseLDAX() ([]byte, error) {
+	p.advanceToken()
+
 	if p.currentToken().Type != lexer.REGISTER {
 		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
 	}
@@ -266,27 +278,19 @@ func generateLDAXHex(dest string) ([]byte, error) {
 	return []byte{opcode}, nil
 }
 
-func (p *Parser) parseSTA() ([]byte, error) {
-	opcode := byte(0x32)
-
-	if p.currentToken().Type == lexer.NUMBER {
-		highByte, lowByte, err := parseHex(p.currentToken().Literal)
-		if err != nil {
-			return nil, err
-		}
-		return []byte{opcode, lowByte, highByte}, nil
+func (p *Parser) parseDirectAddressInstruction() ([]byte, error) {
+	opcodes := map[string]byte{
+		"STA":  0x32,
+		"LDA":  0x3A,
+		"SHLD": 0x22,
+		"LHLD": 0x2A,
 	}
 
-	if p.currentToken().Type == lexer.LABEL {
-		p.labelReferences[p.currentToken().Literal] = uint16(len(p.bytecode) + 1)
-		return []byte{opcode, 0x00, 0x00}, nil
+	opcode, valid := opcodes[p.currentToken().Literal]
+	if !valid {
+		return nil, fmt.Errorf("invalid direct address instruction: %s, ", p.currentToken().Literal)
 	}
-
-	return nil, fmt.Errorf("expected address or label, got: %s", p.currentToken().Type)
-}
-
-func (p *Parser) parseLDA() ([]byte, error) {
-	opcode := byte(0x3A)
+	p.advanceToken()
 
 	if p.currentToken().Type == lexer.NUMBER {
 		highByte, lowByte, err := parseHex(p.currentToken().Literal)
@@ -305,6 +309,7 @@ func (p *Parser) parseLDA() ([]byte, error) {
 }
 
 func (p *Parser) parseJMP() ([]byte, error) {
+	p.advanceToken()
 
 	if p.currentToken().Type == lexer.NUMBER {
 		highByte, lowByte, err := parseHex(p.currentToken().Literal)
@@ -323,6 +328,8 @@ func (p *Parser) parseJMP() ([]byte, error) {
 }
 
 func (p *Parser) parseDB() ([]byte, error) {
+	p.advanceToken()
+
 	var data []byte
 
 	for p.currentToken().Type == lexer.NUMBER || p.currentToken().Type == lexer.STRING {

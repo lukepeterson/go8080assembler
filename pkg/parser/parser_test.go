@@ -826,6 +826,7 @@ func TestParser_Parse(t *testing.T) {
 			},
 			wantErr: true,
 		},
+
 		{
 			name: "MVI B, 0x55",
 			tokens: []lexer.Token{
