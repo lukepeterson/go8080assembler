@@ -94,9 +94,12 @@ var instructionMap = map[string]parseFunc{
 	"LDA":  (*Parser).parseDirectAddressInstruction,
 	"SHLD": (*Parser).parseDirectAddressInstruction,
 	"LHLD": (*Parser).parseDirectAddressInstruction,
-	"XCHG": (*Parser).parseXCHG,
+	"XCHG": (*Parser).parseSingleByteInstruction,
 	"PUSH": (*Parser).parsePUSH,
 	"POP":  (*Parser).parsePOP,
+
+	"XTHL": (*Parser).parseSingleByteInstruction,
+	"SPHL": (*Parser).parseSingleByteInstruction,
 
 	"JMP": (*Parser).parseJMP,
 	"DB":  (*Parser).parseDB,
@@ -312,10 +315,21 @@ func (p *Parser) parseDirectAddressInstruction() ([]byte, error) {
 	return nil, fmt.Errorf("expected address or label, got: %s", p.currentToken().Type)
 }
 
-// TODO: Refactor all single byte instructions into one function
-func (p *Parser) parseXCHG() ([]byte, error) {
+func (p *Parser) parseSingleByteInstruction() ([]byte, error) {
+	opcodes := map[string]byte{
+		"XCHG": 0xEB,
+
+		"XTHL": 0xE3,
+		"SPHL": 0xF9,
+	}
+
+	opcode, valid := opcodes[p.currentToken().Literal]
+	if !valid {
+		return nil, fmt.Errorf("invalid instruction: %s, ", p.currentToken().Literal)
+	}
 	p.advanceToken()
-	return []byte{0xEB}, nil
+
+	return []byte{opcode}, nil
 }
 
 // TODO: Refactor PUSH and POP into one function as the only difference is the opcode.

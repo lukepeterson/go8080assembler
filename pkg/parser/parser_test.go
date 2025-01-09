@@ -1294,6 +1294,22 @@ func TestParser_Parse(t *testing.T) {
 			},
 			wantBytecode: []byte{0xF1},
 		},
+		{
+			name: "XTHL",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "XTHL"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xE3},
+		},
+		{
+			name: "SPHL",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SPHL"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xF9},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

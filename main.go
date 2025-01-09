@@ -28,13 +28,12 @@ func main() {
 	// 	fmt.Printf("%02X ", instruction)
 	// }
 
-	// input := `MVI A, 0x33
-	// TEST:	MOV B, C   ; The first comment
-	// 		LDA, 1234h ; The second comment
-	// 		JMP TEST
-
-	// 	; The third comment with another colon ; here
-	// 		`
+	// input := `
+	// 	MVI A, 0x33
+	// 	TEST:	MOV B, C   ; The first comment
+	// 	LDA 1234h ; The second comment
+	// 	JMP TEST
+	// `
 
 	input := `
 	; Simple 8080 Assembly Program to Test Lexer
