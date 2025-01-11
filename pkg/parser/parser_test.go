@@ -1019,6 +1019,195 @@ func TestParser_Parse(t *testing.T) {
 			wantBytecode: []byte{0x31, 0x55, 0x44},
 		},
 		{
+			name: "INX B",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INX"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x03},
+		},
+		{
+			name: "INX C (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INX"},
+				{Type: lexer.REGISTER, Literal: "C"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "INX D",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INX"},
+				{Type: lexer.REGISTER, Literal: "D"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x13},
+		},
+		{
+			name: "INX E (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INX"},
+				{Type: lexer.REGISTER, Literal: "E"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "INX H",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INX"},
+				{Type: lexer.REGISTER, Literal: "H"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x23},
+		},
+		{
+			name: "INX L (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INX"},
+				{Type: lexer.REGISTER, Literal: "L"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "INX SP",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INX"},
+				{Type: lexer.REGISTER, Literal: "SP"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x33},
+		},
+		{
+			name: "DCX B",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCX"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x0B},
+		},
+		{
+			name: "DCX C (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCX"},
+				{Type: lexer.REGISTER, Literal: "C"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "DCX D",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCX"},
+				{Type: lexer.REGISTER, Literal: "D"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x1B},
+		},
+		{
+			name: "DCX E (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCX"},
+				{Type: lexer.REGISTER, Literal: "E"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "DCX H",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCX"},
+				{Type: lexer.REGISTER, Literal: "H"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x2B},
+		},
+		{
+			name: "DCX L (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCX"},
+				{Type: lexer.REGISTER, Literal: "L"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "DCX SP",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCX"},
+				{Type: lexer.REGISTER, Literal: "SP"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x3B},
+		},
+		{
+			name: "DAD B",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DAD"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x09},
+		},
+		{
+			name: "DAD C (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DAD"},
+				{Type: lexer.REGISTER, Literal: "C"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "DAD D",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DAD"},
+				{Type: lexer.REGISTER, Literal: "D"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x19},
+		},
+		{
+			name: "DAD E (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DAD"},
+				{Type: lexer.REGISTER, Literal: "E"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "DAD H",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DAD"},
+				{Type: lexer.REGISTER, Literal: "H"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x29},
+		},
+		{
+			name: "DAD L (invalid destination register)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DAD"},
+				{Type: lexer.REGISTER, Literal: "L"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "DAD SP",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DAD"},
+				{Type: lexer.REGISTER, Literal: "SP"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x39},
+		},
+		{
 			name: "STAX B",
 			tokens: []lexer.Token{
 				{Type: lexer.MNEMONIC, Literal: "STAX"},

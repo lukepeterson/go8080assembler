@@ -84,25 +84,33 @@ func (p *Parser) Parse() ([]byte, error) {
 type parseFunc func(*Parser) ([]byte, error)
 
 var instructionMap = map[string]parseFunc{
+
+	// MOVE, LOAD AND STORE
 	"MOV":  (*Parser).parseMOV,
 	"MVI":  (*Parser).parseMVI,
 	"LXI":  (*Parser).parseLXI,
 	"STAX": (*Parser).parseSTAX,
 	"LDAX": (*Parser).parseLDAX,
-
 	"STA":  (*Parser).parseDirectAddressInstruction,
 	"LDA":  (*Parser).parseDirectAddressInstruction,
 	"SHLD": (*Parser).parseDirectAddressInstruction,
 	"LHLD": (*Parser).parseDirectAddressInstruction,
 	"XCHG": (*Parser).parseSingleByteInstruction,
-	"PUSH": (*Parser).parsePUSH,
-	"POP":  (*Parser).parsePOP,
 
+	// STACK OPERATIONS
 	"XTHL": (*Parser).parseSingleByteInstruction,
 	"SPHL": (*Parser).parseSingleByteInstruction,
 
+	"PUSH": (*Parser).parseRegisterPairInstruction,
+	"POP":  (*Parser).parseRegisterPairInstruction,
+	"INX":  (*Parser).parseRegisterPairInstruction,
+	"DCX":  (*Parser).parseRegisterPairInstruction,
+	"DAD":  (*Parser).parseRegisterPairInstruction,
+
+	// JUMP
 	"JMP": (*Parser).parseJMP,
-	"DB":  (*Parser).parseDB,
+
+	"DB": (*Parser).parseDB,
 }
 
 var registerMap8 = map[string]byte{
@@ -246,7 +254,7 @@ func (p *Parser) parseSTAX() ([]byte, error) {
 }
 
 func generateSTAXHex(dest string) ([]byte, error) {
-	var registerMap = map[string]byte{
+	registerMap := map[string]byte{
 		"B": 0x00, "D": 0x01,
 	}
 
@@ -272,7 +280,7 @@ func (p *Parser) parseLDAX() ([]byte, error) {
 }
 
 func generateLDAXHex(dest string) ([]byte, error) {
-	var registerMap = map[string]byte{
+	registerMap := map[string]byte{
 		"B": 0x00, "D": 0x01,
 	}
 
@@ -332,8 +340,22 @@ func (p *Parser) parseSingleByteInstruction() ([]byte, error) {
 	return []byte{opcode}, nil
 }
 
-// TODO: Refactor PUSH and POP into one function as the only difference is the opcode.
-func (p *Parser) parsePUSH() ([]byte, error) {
+func (p *Parser) parseRegisterPairInstruction() ([]byte, error) {
+	opcodes := map[string]byte{
+		"PUSH": 0xC5,
+		"POP":  0xC1,
+		"INX":  0x03,
+		"DCX":  0x0B,
+		"DAD":  0x09,
+	}
+
+	registerMap := map[string]byte{
+		"B": 0x00, "D": 0x01, "H": 0x02, "PSW": 0x03, "SP": 0x03,
+	}
+	opcode, valid := opcodes[p.currentToken().Literal]
+	if !valid {
+		return nil, fmt.Errorf("invalid instruction: %s, ", p.currentToken().Literal)
+	}
 	p.advanceToken()
 
 	if p.currentToken().Type != lexer.REGISTER {
@@ -342,46 +364,12 @@ func (p *Parser) parsePUSH() ([]byte, error) {
 	dest := p.currentToken().Literal
 	p.advanceToken()
 
-	return generatePUSHHex(dest)
-}
-
-func generatePUSHHex(dest string) ([]byte, error) {
-	var registerMap = map[string]byte{
-		"B": 0x00, "D": 0x01, "H": 0x02, "PSW": 0x03,
-	}
-
 	destRegister, exists := registerMap[dest]
 	if !exists {
-		return nil, fmt.Errorf("invalid destination register for PUSH: %s", dest)
+		return nil, fmt.Errorf("invalid destination register for %s: %s", p.currentToken().Literal, dest)
 	}
 
-	opcode := byte(0xC5) | (destRegister << 4)
-	return []byte{opcode}, nil
-}
-
-func (p *Parser) parsePOP() ([]byte, error) {
-	p.advanceToken()
-
-	if p.currentToken().Type != lexer.REGISTER {
-		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
-	}
-	dest := p.currentToken().Literal
-	p.advanceToken()
-
-	return generatePOPHex(dest)
-}
-
-func generatePOPHex(dest string) ([]byte, error) {
-	var registerMap = map[string]byte{
-		"B": 0x00, "D": 0x01, "H": 0x02, "PSW": 0x03,
-	}
-
-	destRegister, exists := registerMap[dest]
-	if !exists {
-		return nil, fmt.Errorf("invalid destination register for POP: %s", dest)
-	}
-
-	opcode := byte(0xC1) | (destRegister << 4)
+	opcode = opcode | (destRegister << 4)
 	return []byte{opcode}, nil
 }
 
@@ -407,7 +395,7 @@ func (p *Parser) parseJMP() ([]byte, error) {
 func (p *Parser) parseDB() ([]byte, error) {
 	p.advanceToken()
 
-	var data []byte
+	data := []byte{}
 
 	for p.currentToken().Type == lexer.NUMBER || p.currentToken().Type == lexer.STRING {
 		if p.currentToken().Type == lexer.NUMBER {
