@@ -107,8 +107,37 @@ var instructionMap = map[string]parseFunc{
 	"DCX":  (*Parser).parseRegisterPairInstruction,
 	"DAD":  (*Parser).parseRegisterPairInstruction,
 
-	// JUMP
-	"JMP": (*Parser).parseJMP,
+	// JUMP AND CALL
+	"JMP":  (*Parser).parseJumpAndCallInstruction,
+	"JC":   (*Parser).parseJumpAndCallInstruction,
+	"JNC":  (*Parser).parseJumpAndCallInstruction,
+	"JZ":   (*Parser).parseJumpAndCallInstruction,
+	"JNZ":  (*Parser).parseJumpAndCallInstruction,
+	"JP":   (*Parser).parseJumpAndCallInstruction,
+	"JM":   (*Parser).parseJumpAndCallInstruction,
+	"JPE":  (*Parser).parseJumpAndCallInstruction,
+	"JPO":  (*Parser).parseJumpAndCallInstruction,
+	"PCHL": (*Parser).parseSingleByteInstruction,
+	"CALL": (*Parser).parseJumpAndCallInstruction,
+	"CC":   (*Parser).parseJumpAndCallInstruction,
+	"CNC":  (*Parser).parseJumpAndCallInstruction,
+	"CZ":   (*Parser).parseJumpAndCallInstruction,
+	"CNZ":  (*Parser).parseJumpAndCallInstruction,
+	"CP":   (*Parser).parseJumpAndCallInstruction,
+	"CM":   (*Parser).parseJumpAndCallInstruction,
+	"CPE":  (*Parser).parseJumpAndCallInstruction,
+	"CPO":  (*Parser).parseJumpAndCallInstruction,
+
+	// RETURN
+	"RET": (*Parser).parseSingleByteInstruction,
+	"RC":  (*Parser).parseSingleByteInstruction,
+	"RNC": (*Parser).parseSingleByteInstruction,
+	"RZ":  (*Parser).parseSingleByteInstruction,
+	"RNZ": (*Parser).parseSingleByteInstruction,
+	"RP":  (*Parser).parseSingleByteInstruction,
+	"RM":  (*Parser).parseSingleByteInstruction,
+	"RPE": (*Parser).parseSingleByteInstruction,
+	"RPO": (*Parser).parseSingleByteInstruction,
 
 	"DB": (*Parser).parseDB,
 }
@@ -326,9 +355,18 @@ func (p *Parser) parseDirectAddressInstruction() ([]byte, error) {
 func (p *Parser) parseSingleByteInstruction() ([]byte, error) {
 	opcodes := map[string]byte{
 		"XCHG": 0xEB,
-
 		"XTHL": 0xE3,
 		"SPHL": 0xF9,
+		"PCHL": 0xE9,
+		"RET":  0xC9,
+		"RC":   0xD8,
+		"RNC":  0xD0,
+		"RZ":   0xC8,
+		"RNZ":  0xC0,
+		"RP":   0xF0,
+		"RM":   0xF8,
+		"RPE":  0xE8,
+		"RPO":  0xE0,
 	}
 
 	opcode, valid := opcodes[p.currentToken().Literal]
@@ -373,7 +411,32 @@ func (p *Parser) parseRegisterPairInstruction() ([]byte, error) {
 	return []byte{opcode}, nil
 }
 
-func (p *Parser) parseJMP() ([]byte, error) {
+func (p *Parser) parseJumpAndCallInstruction() ([]byte, error) {
+	opcodes := map[string]byte{
+		"JMP":  0xC3,
+		"JC":   0xDA,
+		"JNC":  0xD2,
+		"JZ":   0xCA,
+		"JNZ":  0xC2,
+		"JP":   0xF2,
+		"JM":   0xFA,
+		"JPE":  0xEA,
+		"JPO":  0xE2,
+		"CALL": 0xCD,
+		"CC":   0xDC,
+		"CNC":  0xD4,
+		"CZ":   0xCC,
+		"CNZ":  0xC4,
+		"CP":   0xF4,
+		"CM":   0xFC,
+		"CPE":  0xEC,
+		"CPO":  0xE4,
+	}
+
+	opcode, valid := opcodes[p.currentToken().Literal]
+	if !valid {
+		return nil, fmt.Errorf("invalid instruction: %s, ", p.currentToken().Literal)
+	}
 	p.advanceToken()
 
 	if p.currentToken().Type == lexer.NUMBER {
@@ -381,12 +444,12 @@ func (p *Parser) parseJMP() ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		return []byte{0xC3, lowByte, highByte}, nil
+		return []byte{opcode, lowByte, highByte}, nil
 	}
 
 	if p.currentToken().Type == lexer.LABEL {
 		p.labelReferences[p.currentToken().Literal] = uint16(len(p.bytecode) + 1)
-		return []byte{0xC3, 0x00, 0x00}, nil
+		return []byte{opcode, 0x00, 0x00}, nil
 	}
 
 	return nil, fmt.Errorf("expected address or label, got: %s", p.currentToken().Type)

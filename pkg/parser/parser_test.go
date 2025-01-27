@@ -826,7 +826,6 @@ func TestParser_Parse(t *testing.T) {
 			},
 			wantErr: true,
 		},
-
 		{
 			name: "MVI B, 0x55",
 			tokens: []lexer.Token{
@@ -1498,6 +1497,302 @@ func TestParser_Parse(t *testing.T) {
 				{Type: lexer.EOF},
 			},
 			wantBytecode: []byte{0xF9},
+		},
+		{
+			name: "JMP (to address)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "JMP"},
+				{Type: lexer.NUMBER, Literal: "0x04"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xC3, 0x04, 0x00},
+		},
+		{
+			name: "JMP (to label)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "JMP"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xC3, 0x03, 0x00},
+		},
+		{
+			name: "JC",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "JC"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xDA, 0x03, 0x00},
+		},
+		{
+			name: "JNC",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "JNC"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xD2, 0x03, 0x00},
+		},
+		{
+			name: "JZ",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "JZ"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xCA, 0x03, 0x00},
+		},
+		{
+			name: "JNZ",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "JNZ"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xC2, 0x03, 0x00},
+		},
+		{
+			name: "JP",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "JP"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xF2, 0x03, 0x00},
+		},
+		{
+			name: "JM",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "JM"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xFA, 0x03, 0x00},
+		},
+		{
+			name: "JPE",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "JPE"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xEA, 0x03, 0x00},
+		},
+		{
+			name: "JPO",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "JPO"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xE2, 0x03, 0x00},
+		},
+		{
+			name: "PCHL",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "PCHL"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xE9},
+		},
+		{
+			name: "CALL (to address)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "CALL"},
+				{Type: lexer.NUMBER, Literal: "0x04"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xCD, 0x04, 0x00},
+		},
+		{
+			name: "CALL (to label)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "CALL"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xCD, 0x03, 0x00},
+		},
+		{
+			name: "CC",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "CC"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xDC, 0x03, 0x00},
+		},
+		{
+			name: "CNC",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "CNC"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xD4, 0x03, 0x00},
+		},
+		{
+			name: "CZ",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "CZ"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xCC, 0x03, 0x00},
+		},
+		{
+			name: "CNZ",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "CNZ"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xC4, 0x03, 0x00},
+		},
+		{
+			name: "CP",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "CP"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xF4, 0x03, 0x00},
+		},
+		{
+			name: "CM",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "CM"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xFC, 0x03, 0x00},
+		},
+		{
+			name: "CPE",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "CPE"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xEC, 0x03, 0x00},
+		},
+		{
+			name: "CPO",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "CPO"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xE4, 0x03, 0x00},
+		},
+		{
+			name: "RET",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RET"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xC9},
+		},
+		{
+			name: "RC",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RC"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xD8},
+		},
+		{
+			name: "RNC",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RNC"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xD0},
+		},
+		{
+			name: "RZ",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RZ"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xC8},
+		},
+		{
+			name: "RNZ",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RNZ"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xC0},
+		},
+		{
+			name: "RP",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RP"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xF0},
+		},
+		{
+			name: "RM",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RM"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xF8},
+		},
+		{
+			name: "RPE",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RPE"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xE8},
+		},
+		{
+			name: "RPO",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RPO"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xE0},
 		},
 	}
 	for _, tt := range tests {
