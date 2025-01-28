@@ -139,6 +139,9 @@ var instructionMap = map[string]parseFunc{
 	"RPE": (*Parser).parseSingleByteInstruction,
 	"RPO": (*Parser).parseSingleByteInstruction,
 
+	// RESTART
+	"RST": (*Parser).parseRestartInstruction,
+
 	"DB": (*Parser).parseDB,
 }
 
@@ -453,6 +456,22 @@ func (p *Parser) parseJumpAndCallInstruction() ([]byte, error) {
 	}
 
 	return nil, fmt.Errorf("expected address or label, got: %s", p.currentToken().Type)
+}
+
+func (p *Parser) parseRestartInstruction() ([]byte, error) {
+	p.advanceToken()
+
+	if p.currentToken().Type != lexer.NUMBER {
+		return nil, fmt.Errorf("expected number, got: %s", p.currentToken().Literal)
+	}
+
+	routine, err := strconv.ParseUint(p.currentToken().Literal, 16, 8)
+	if err != nil || routine > 7 {
+		return nil, fmt.Errorf("invalid routine value: %s", p.currentToken().Literal)
+	}
+
+	opcode := byte(0xC7 + routine<<3)
+	return []byte{opcode}, nil
 }
 
 func (p *Parser) parseDB() ([]byte, error) {

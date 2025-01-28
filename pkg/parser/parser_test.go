@@ -1794,6 +1794,105 @@ func TestParser_Parse(t *testing.T) {
 			},
 			wantBytecode: []byte{0xE0},
 		},
+		{
+			name: "RST 0",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RST"},
+				{Type: lexer.NUMBER, Literal: "0"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xC7},
+		},
+		{
+			name: "RST 1",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RST"},
+				{Type: lexer.NUMBER, Literal: "1"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xCF},
+		},
+		{
+			name: "RST 2",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RST"},
+				{Type: lexer.NUMBER, Literal: "2"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xD7},
+		},
+		{
+			name: "RST 3",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RST"},
+				{Type: lexer.NUMBER, Literal: "3"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xDF},
+		},
+		{
+			name: "RST 4",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RST"},
+				{Type: lexer.NUMBER, Literal: "4"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xE7},
+		},
+		{
+			name: "RST 5",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RST"},
+				{Type: lexer.NUMBER, Literal: "5"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xEF},
+		},
+		{
+			name: "RST 6",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RST"},
+				{Type: lexer.NUMBER, Literal: "6"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xF7},
+		},
+		{
+			name: "RST 7",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RST"},
+				{Type: lexer.NUMBER, Literal: "7"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xFF},
+		},
+		{
+			name: "RST 8 (routine out of range)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RST"},
+				{Type: lexer.NUMBER, Literal: "8"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "RST -1 (negative number for routine)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RST"},
+				{Type: lexer.NUMBER, Literal: "-1"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "RST A (non-number for routine)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RST"},
+				{Type: lexer.STRING, Literal: "A"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
