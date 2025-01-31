@@ -142,6 +142,10 @@ var instructionMap = map[string]parseFunc{
 	// RESTART
 	"RST": (*Parser).parseRestartInstruction,
 
+	// INCREMENT AND DECREMENT
+	"INR": (*Parser).parseRegister8Instruction,
+	"DCR": (*Parser).parseRegister8Instruction,
+
 	"DB": (*Parser).parseDB,
 }
 
@@ -381,6 +385,8 @@ func (p *Parser) parseSingleByteInstruction() ([]byte, error) {
 	return []byte{opcode}, nil
 }
 
+// TODO: make this parseRegister16Instruction?
+// Need to work out how to deal with PSW.
 func (p *Parser) parseRegisterPairInstruction() ([]byte, error) {
 	opcodes := map[string]byte{
 		"PUSH": 0xC5,
@@ -467,10 +473,37 @@ func (p *Parser) parseRestartInstruction() ([]byte, error) {
 
 	routine, err := strconv.ParseUint(p.currentToken().Literal, 16, 8)
 	if err != nil || routine > 7 {
-		return nil, fmt.Errorf("invalid routine value: %s", p.currentToken().Literal)
+		return nil, fmt.Errorf("expected routine value between 0 and 7, got: %s", p.currentToken().Literal)
 	}
 
 	opcode := byte(0xC7 + routine<<3)
+	return []byte{opcode}, nil
+}
+
+func (p *Parser) parseRegister8Instruction() ([]byte, error) {
+	opcodes := map[string]byte{
+		"INR": 0x04,
+		"DCR": 0x05,
+	}
+
+	opcode, valid := opcodes[p.currentToken().Literal]
+	if !valid {
+		return nil, fmt.Errorf("invalid instruction: %s, ", p.currentToken().Literal)
+	}
+	p.advanceToken()
+
+	if p.currentToken().Type != lexer.REGISTER {
+		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
+	}
+	dest := p.currentToken().Literal
+	p.advanceToken()
+
+	destRegister, exists := registerMap8[dest]
+	if !exists {
+		return nil, fmt.Errorf("invalid destination register for %s: %s", p.currentToken().Literal, dest)
+	}
+
+	opcode = opcode | (destRegister << 3)
 	return []byte{opcode}, nil
 }
 

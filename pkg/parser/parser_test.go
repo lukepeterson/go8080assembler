@@ -1893,6 +1893,150 @@ func TestParser_Parse(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "INR B",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INR"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x04},
+		},
+		{
+			name: "INR C",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INR"},
+				{Type: lexer.REGISTER, Literal: "C"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x0C},
+		},
+		{
+			name: "INR D",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INR"},
+				{Type: lexer.REGISTER, Literal: "D"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x14},
+		},
+		{
+			name: "INR E",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INR"},
+				{Type: lexer.REGISTER, Literal: "E"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x1C},
+		},
+		{
+			name: "INR H",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INR"},
+				{Type: lexer.REGISTER, Literal: "H"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x24},
+		},
+		{
+			name: "INR L",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INR"},
+				{Type: lexer.REGISTER, Literal: "L"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x2C},
+		},
+		{
+			name: "INR M",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INR"},
+				{Type: lexer.REGISTER, Literal: "M"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x34},
+		},
+		{
+			name: "INR A",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INR"},
+				{Type: lexer.REGISTER, Literal: "A"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x3C},
+		},
+		{
+			name: "DCR B",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCR"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x05},
+		},
+		{
+			name: "DCR C",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCR"},
+				{Type: lexer.REGISTER, Literal: "C"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x0D},
+		},
+		{
+			name: "DCR D",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCR"},
+				{Type: lexer.REGISTER, Literal: "D"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x15},
+		},
+		{
+			name: "DCR E",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCR"},
+				{Type: lexer.REGISTER, Literal: "E"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x1D},
+		},
+		{
+			name: "DCR H",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCR"},
+				{Type: lexer.REGISTER, Literal: "H"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x25},
+		},
+		{
+			name: "DCR L",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCR"},
+				{Type: lexer.REGISTER, Literal: "L"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x2D},
+		},
+		{
+			name: "DCR M",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCR"},
+				{Type: lexer.REGISTER, Literal: "M"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x35},
+		},
+		{
+			name: "DCR A",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DCR"},
+				{Type: lexer.REGISTER, Literal: "A"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x3D},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

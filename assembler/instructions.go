@@ -146,14 +146,14 @@ var instructionSet = map[string]Instruction{
 	// "RPO": {Opcode: 0xE0, Length: 1},
 
 	// RESTART
-	"RST 0": {Opcode: 0xC7, Length: 1},
-	"RST 1": {Opcode: 0xCF, Length: 1},
-	"RST 2": {Opcode: 0xD7, Length: 1},
-	"RST 3": {Opcode: 0xDF, Length: 1},
-	"RST 4": {Opcode: 0xE7, Length: 1},
-	"RST 5": {Opcode: 0xEF, Length: 1},
-	"RST 6": {Opcode: 0xF7, Length: 1},
-	"RST 7": {Opcode: 0xFF, Length: 1},
+	// "RST 0": {Opcode: 0xC7, Length: 1},
+	// "RST 1": {Opcode: 0xCF, Length: 1},
+	// "RST 2": {Opcode: 0xD7, Length: 1},
+	// "RST 3": {Opcode: 0xDF, Length: 1},
+	// "RST 4": {Opcode: 0xE7, Length: 1},
+	// "RST 5": {Opcode: 0xEF, Length: 1},
+	// "RST 6": {Opcode: 0xF7, Length: 1},
+	// "RST 7": {Opcode: 0xFF, Length: 1},
 
 	// INCREMENT AND DECREMENT
 	"INR B": {Opcode: 0x04, Length: 1},
