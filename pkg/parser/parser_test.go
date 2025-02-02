@@ -2182,6 +2182,42 @@ func TestParser_Parse(t *testing.T) {
 			wantBytecode: []byte{0x8F},
 		},
 		{
+			name: "ADI 0x44",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADI"},
+				{Type: lexer.NUMBER, Literal: "0x44"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xC6, 0x44},
+		},
+		{
+			name: "ADI 0x4455 (two bytes of data)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADI"},
+				{Type: lexer.NUMBER, Literal: "0x4455"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "ACI 0x44",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ACI"},
+				{Type: lexer.NUMBER, Literal: "0x44"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xCE, 0x44},
+		},
+		{
+			name: "ACI 0x4455 (two bytes of data)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ACI"},
+				{Type: lexer.NUMBER, Literal: "0x4455"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
 			name: "SUB B",
 			tokens: []lexer.Token{
 				{Type: lexer.MNEMONIC, Literal: "SUB"},
@@ -2324,6 +2360,42 @@ func TestParser_Parse(t *testing.T) {
 				{Type: lexer.EOF},
 			},
 			wantBytecode: []byte{0x9F},
+		},
+		{
+			name: "SUI 0x44",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SUI"},
+				{Type: lexer.NUMBER, Literal: "0x44"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xD6, 0x44},
+		},
+		{
+			name: "SUI 0x4455 (two bytes of data)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SUI"},
+				{Type: lexer.NUMBER, Literal: "0x4455"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "SBI 0x44",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SBI"},
+				{Type: lexer.NUMBER, Literal: "0x44"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xDE, 0x44},
+		},
+		{
+			name: "SBI 0x4455 (two bytes of data)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SBI"},
+				{Type: lexer.NUMBER, Literal: "0x4455"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {

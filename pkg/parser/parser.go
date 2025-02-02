@@ -149,8 +149,12 @@ var instructionMap = map[string]parseFunc{
 	// ADD AND SUBTRACT
 	"ADD": (*Parser).parseRegister8Instruction,
 	"ADC": (*Parser).parseRegister8Instruction,
+	"ADI": (*Parser).parseImmediateInstruction,
+	"ACI": (*Parser).parseImmediateInstruction,
 	"SUB": (*Parser).parseRegister8Instruction,
 	"SBB": (*Parser).parseRegister8Instruction,
+	"SUI": (*Parser).parseImmediateInstruction,
+	"SBI": (*Parser).parseImmediateInstruction,
 
 	"DB": (*Parser).parseDB,
 }
@@ -363,6 +367,40 @@ func (p *Parser) parseDirectAddressInstruction() ([]byte, error) {
 	}
 
 	return nil, fmt.Errorf("expected address or label, got: %s", p.currentToken().Type)
+}
+
+func (p *Parser) parseImmediateInstruction() ([]byte, error) {
+	opcodes := map[string]byte{
+		"ADI": 0xC6,
+		"ACI": 0xCE,
+		"SUI": 0xD6,
+		"SBI": 0xDE,
+		"ANI": 0xE6,
+		"XRI": 0xEE,
+		"ORI": 0xF6,
+		"CPI": 0xFE,
+	}
+
+	opcode, valid := opcodes[p.currentToken().Literal]
+	if !valid {
+		return nil, fmt.Errorf("invalid immediate instruction: %s, ", p.currentToken().Literal)
+	}
+	p.advanceToken()
+
+	if p.currentToken().Type == lexer.NUMBER {
+		highByte, lowByte, err := parseHex(p.currentToken().Literal)
+		if err != nil {
+			return nil, err
+		}
+
+		if highByte != 0x00 {
+			return nil, fmt.Errorf("expected single byte of data, got: %s", p.currentToken().Literal)
+		}
+
+		return []byte{opcode, lowByte}, nil
+	}
+
+	return nil, fmt.Errorf("expected number, got: %s", p.currentToken().Type)
 }
 
 func (p *Parser) parseSingleByteInstruction() ([]byte, error) {
