@@ -146,6 +146,12 @@ var instructionMap = map[string]parseFunc{
 	"INR": (*Parser).parseRegister8Instruction,
 	"DCR": (*Parser).parseRegister8Instruction,
 
+	// ADD AND SUBTRACT
+	"ADD": (*Parser).parseRegister8Instruction,
+	"ADC": (*Parser).parseRegister8Instruction,
+	"SUB": (*Parser).parseRegister8Instruction,
+	"SBB": (*Parser).parseRegister8Instruction,
+
 	"DB": (*Parser).parseDB,
 }
 
@@ -484,6 +490,10 @@ func (p *Parser) parseRegister8Instruction() ([]byte, error) {
 	opcodes := map[string]byte{
 		"INR": 0x04,
 		"DCR": 0x05,
+		"ADD": 0x80,
+		"ADC": 0x88,
+		"SUB": 0x90,
+		"SBB": 0x98,
 	}
 
 	opcode, valid := opcodes[p.currentToken().Literal]
@@ -503,7 +513,14 @@ func (p *Parser) parseRegister8Instruction() ([]byte, error) {
 		return nil, fmt.Errorf("invalid destination register for %s: %s", p.currentToken().Literal, dest)
 	}
 
-	opcode = opcode | (destRegister << 3)
+	// TODO: Find a better way to do this
+	// If INR or DCR, set shift to 3
+	shiftAmount := 0
+	if opcode == 0x04 || opcode == 0x05 {
+		shiftAmount = 3
+	}
+
+	opcode = opcode | (destRegister << shiftAmount)
 	return []byte{opcode}, nil
 }
 

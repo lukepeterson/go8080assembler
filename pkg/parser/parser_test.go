@@ -2037,6 +2037,294 @@ func TestParser_Parse(t *testing.T) {
 			},
 			wantBytecode: []byte{0x3D},
 		},
+		{
+			name: "ADD B",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADD"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x80},
+		},
+		{
+			name: "ADD C",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADD"},
+				{Type: lexer.REGISTER, Literal: "C"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x81},
+		},
+		{
+			name: "ADD D",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADD"},
+				{Type: lexer.REGISTER, Literal: "D"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x82},
+		},
+		{
+			name: "ADD E",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADD"},
+				{Type: lexer.REGISTER, Literal: "E"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x83},
+		},
+		{
+			name: "ADD H",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADD"},
+				{Type: lexer.REGISTER, Literal: "H"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x84},
+		},
+		{
+			name: "ADD L",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADD"},
+				{Type: lexer.REGISTER, Literal: "L"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x85},
+		},
+		{
+			name: "ADD M",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADD"},
+				{Type: lexer.REGISTER, Literal: "M"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x86},
+		},
+		{
+			name: "ADD A",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADD"},
+				{Type: lexer.REGISTER, Literal: "A"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x87},
+		},
+		{
+			name: "ADC B",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADC"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x88},
+		},
+		{
+			name: "ADC C",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADC"},
+				{Type: lexer.REGISTER, Literal: "C"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x89},
+		},
+		{
+			name: "ADC D",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADC"},
+				{Type: lexer.REGISTER, Literal: "D"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x8A},
+		},
+		{
+			name: "ADC E",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADC"},
+				{Type: lexer.REGISTER, Literal: "E"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x8B},
+		},
+		{
+			name: "ADC H",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADC"},
+				{Type: lexer.REGISTER, Literal: "H"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x8C},
+		},
+		{
+			name: "ADC L",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADC"},
+				{Type: lexer.REGISTER, Literal: "L"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x8D},
+		},
+		{
+			name: "ADC M",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADC"},
+				{Type: lexer.REGISTER, Literal: "M"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x8E},
+		},
+		{
+			name: "ADC A",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ADC"},
+				{Type: lexer.REGISTER, Literal: "A"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x8F},
+		},
+		{
+			name: "SUB B",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SUB"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x90},
+		},
+		{
+			name: "SUB C",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SUB"},
+				{Type: lexer.REGISTER, Literal: "C"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x91},
+		},
+		{
+			name: "SUB D",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SUB"},
+				{Type: lexer.REGISTER, Literal: "D"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x92},
+		},
+		{
+			name: "SUB E",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SUB"},
+				{Type: lexer.REGISTER, Literal: "E"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x93},
+		},
+		{
+			name: "SUB H",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SUB"},
+				{Type: lexer.REGISTER, Literal: "H"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x94},
+		},
+		{
+			name: "SUB L",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SUB"},
+				{Type: lexer.REGISTER, Literal: "L"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x95},
+		},
+		{
+			name: "SUB M",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SUB"},
+				{Type: lexer.REGISTER, Literal: "M"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x96},
+		},
+		{
+			name: "SUB A",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SUB"},
+				{Type: lexer.REGISTER, Literal: "A"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x97},
+		},
+		{
+			name: "SBB B",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SBB"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x98},
+		},
+		{
+			name: "SBB C",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SBB"},
+				{Type: lexer.REGISTER, Literal: "C"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x99},
+		},
+		{
+			name: "SBB D",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SBB"},
+				{Type: lexer.REGISTER, Literal: "D"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x9A},
+		},
+		{
+			name: "SBB E",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SBB"},
+				{Type: lexer.REGISTER, Literal: "E"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x9B},
+		},
+		{
+			name: "SBB H",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SBB"},
+				{Type: lexer.REGISTER, Literal: "H"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x9C},
+		},
+		{
+			name: "SBB L",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SBB"},
+				{Type: lexer.REGISTER, Literal: "L"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x9D},
+		},
+		{
+			name: "SBB M",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SBB"},
+				{Type: lexer.REGISTER, Literal: "M"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x9E},
+		},
+		{
+			name: "SBB A",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SBB"},
+				{Type: lexer.REGISTER, Literal: "A"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x9F},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
