@@ -166,6 +166,28 @@ var instructionMap = map[string]parseFunc{
 	"ORA": (*Parser).parseRegister8Instruction,
 	"CMP": (*Parser).parseRegister8Instruction,
 
+	// ROTATE
+	"RLC": (*Parser).parseSingleByteInstruction,
+	"RRC": (*Parser).parseSingleByteInstruction,
+	"RAL": (*Parser).parseSingleByteInstruction,
+	"RAR": (*Parser).parseSingleByteInstruction,
+
+	// SPECIALS
+	"CMA": (*Parser).parseSingleByteInstruction,
+	"STC": (*Parser).parseSingleByteInstruction,
+	"CMC": (*Parser).parseSingleByteInstruction,
+	"DAA": (*Parser).parseSingleByteInstruction,
+
+	// INPUT/OUTPUT
+	"IN":  (*Parser).parseImmediateInstruction,
+	"OUT": (*Parser).parseImmediateInstruction,
+
+	// CONTROL
+	"EI":  (*Parser).parseSingleByteInstruction,
+	"DI":  (*Parser).parseSingleByteInstruction,
+	"NOP": (*Parser).parseSingleByteInstruction,
+	"HLT": (*Parser).parseSingleByteInstruction,
+
 	"DB": (*Parser).parseDB,
 }
 
@@ -389,6 +411,8 @@ func (p *Parser) parseImmediateInstruction() ([]byte, error) {
 		"XRI": 0xEE,
 		"ORI": 0xF6,
 		"CPI": 0xFE,
+		"IN":  0xDB,
+		"OUT": 0xD3,
 	}
 
 	opcode, valid := opcodes[p.currentToken().Literal]
@@ -428,6 +452,18 @@ func (p *Parser) parseSingleByteInstruction() ([]byte, error) {
 		"RM":   0xF8,
 		"RPE":  0xE8,
 		"RPO":  0xE0,
+		"RLC":  0x07,
+		"RRC":  0x0F,
+		"RAL":  0x17,
+		"RAR":  0x1F,
+		"CMA":  0x2F,
+		"STC":  0x37,
+		"CMC":  0x3F,
+		"DAA":  0x27,
+		"EI":   0xFB,
+		"DI":   0xF3,
+		"NOP":  0x00,
+		"HLT":  0x76,
 	}
 
 	opcode, valid := opcodes[p.currentToken().Literal]

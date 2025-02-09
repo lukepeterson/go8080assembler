@@ -2757,6 +2757,138 @@ func TestParser_Parse(t *testing.T) {
 			},
 			wantBytecode: []byte{0xBF},
 		},
+		{
+			name: "RLC",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RLC"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x07},
+		},
+		{
+			name: "RRC",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RRC"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x0F},
+		},
+		{
+			name: "RAL",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RAL"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x17},
+		},
+		{
+			name: "RAR",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "RAR"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x1F},
+		},
+		{
+			name: "CMA",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "CMA"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x2F},
+		},
+		{
+			name: "STC",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "STC"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x37},
+		},
+		{
+			name: "CMC",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "CMC"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x3F},
+		},
+		{
+			name: "DAA",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DAA"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x27},
+		},
+		{
+			name: "IN 0x44",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "IN"},
+				{Type: lexer.NUMBER, Literal: "0x44"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xDB, 0x44},
+		},
+		{
+			name: "IN 0x4455 (two bytes of data)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "IN"},
+				{Type: lexer.NUMBER, Literal: "0x4455"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "OUT 0x44",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "OUT"},
+				{Type: lexer.NUMBER, Literal: "0x44"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xD3, 0x44},
+		},
+		{
+			name: "OUT 0x4455 (two bytes of data)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "OUT"},
+				{Type: lexer.NUMBER, Literal: "0x4455"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "EI",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "EI"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xFB},
+		},
+		{
+			name: "DI",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DI"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xF3},
+		},
+		{
+			name: "NOP",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "NOP"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x00},
+		},
+		{
+			name: "HLT",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "HLT"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x76},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
