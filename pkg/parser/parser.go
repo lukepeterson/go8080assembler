@@ -160,6 +160,12 @@ var instructionMap = map[string]parseFunc{
 	"ORI": (*Parser).parseImmediateInstruction,
 	"CPI": (*Parser).parseImmediateInstruction,
 
+	// LOGICAL
+	"ANA": (*Parser).parseRegister8Instruction,
+	"XRA": (*Parser).parseRegister8Instruction,
+	"ORA": (*Parser).parseRegister8Instruction,
+	"CMP": (*Parser).parseRegister8Instruction,
+
 	"DB": (*Parser).parseDB,
 }
 
@@ -536,6 +542,10 @@ func (p *Parser) parseRegister8Instruction() ([]byte, error) {
 		"ADC": 0x88,
 		"SUB": 0x90,
 		"SBB": 0x98,
+		"ANA": 0xA0,
+		"XRA": 0xA8,
+		"ORA": 0xB0,
+		"CMP": 0xB8,
 	}
 
 	opcode, valid := opcodes[p.currentToken().Literal]
