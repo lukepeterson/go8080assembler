@@ -155,6 +155,10 @@ var instructionMap = map[string]parseFunc{
 	"SBB": (*Parser).parseRegister8Instruction,
 	"SUI": (*Parser).parseImmediateInstruction,
 	"SBI": (*Parser).parseImmediateInstruction,
+	"ANI": (*Parser).parseImmediateInstruction,
+	"XRI": (*Parser).parseImmediateInstruction,
+	"ORI": (*Parser).parseImmediateInstruction,
+	"CPI": (*Parser).parseImmediateInstruction,
 
 	"DB": (*Parser).parseDB,
 }

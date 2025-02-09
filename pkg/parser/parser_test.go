@@ -2397,6 +2397,78 @@ func TestParser_Parse(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "ANI 0x44",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ANI"},
+				{Type: lexer.NUMBER, Literal: "0x44"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xE6, 0x44},
+		},
+		{
+			name: "ANI 0x4455 (two bytes of data)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "SBI"},
+				{Type: lexer.NUMBER, Literal: "0x4455"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "XRI 0x44",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "XRI"},
+				{Type: lexer.NUMBER, Literal: "0x44"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xEE, 0x44},
+		},
+		{
+			name: "XRI 0x4455 (two bytes of data)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "XRI"},
+				{Type: lexer.NUMBER, Literal: "0x4455"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "ORI 0x44",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ORI"},
+				{Type: lexer.NUMBER, Literal: "0x44"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xF6, 0x44},
+		},
+		{
+			name: "ORI 0x4455 (two bytes of data)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "ORI"},
+				{Type: lexer.NUMBER, Literal: "0x4455"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "CPI 0x44",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "CPI"},
+				{Type: lexer.NUMBER, Literal: "0x44"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xFE, 0x44},
+		},
+		{
+			name: "CPI 0x4455 (two bytes of data)",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "CPI"},
+				{Type: lexer.NUMBER, Literal: "0x4455"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
