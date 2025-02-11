@@ -12,8 +12,8 @@ type Parser struct {
 	tokens           []lexer.Token
 	position         int
 	bytecode         []byte
-	labelDefinitions map[string]uint16 // Stores resolved label addresses
-	labelReferences  map[string]uint16 // Tracks unresolved label usages
+	labelDefinitions map[string]uint16   // Stores resolved label addresses
+	labelReferences  map[string][]uint16 // Tracks unresolved label usages
 }
 
 func New(tokens []lexer.Token) *Parser {
@@ -21,7 +21,7 @@ func New(tokens []lexer.Token) *Parser {
 		tokens:           tokens,
 		position:         0,
 		labelDefinitions: make(map[string]uint16),
-		labelReferences:  make(map[string]uint16),
+		labelReferences:  make(map[string][]uint16),
 	}
 }
 
@@ -68,14 +68,20 @@ func (p *Parser) Parse() ([]byte, error) {
 	}
 
 	// TODO: Split this out into a second pass
-	for labelReference, location := range p.labelReferences {
-		hex := p.labelDefinitions[labelReference]
+	for label, positions := range p.labelReferences {
+		targetAddr, targetExists := p.labelDefinitions[label]
+		if targetExists {
+			highByte := uint8(targetAddr >> 8)
+			lowByte := uint8(targetAddr & 0x00FF)
 
-		highByte := uint8(hex >> 8)
-		lowByte := uint8(hex & 0x00FF)
-
-		p.bytecode[location] = lowByte
-		p.bytecode[location+1] = highByte
+			// Update all instances of the label reference
+			for _, position := range positions {
+				p.bytecode[position] = lowByte
+				p.bytecode[position+1] = highByte
+			}
+		} else {
+			return nil, fmt.Errorf("label definition not found: %s", label)
+		}
 	}
 
 	return p.bytecode, nil
@@ -311,7 +317,13 @@ func (p *Parser) parseLXI() ([]byte, error) {
 	}
 
 	if p.currentToken().Type == lexer.LABEL {
-		p.labelReferences[p.currentToken().Literal] = uint16(len(p.bytecode) + 1)
+		label := p.currentToken().Literal
+		_, labelExists := p.labelReferences[label]
+		if !labelExists {
+			p.labelReferences[label] = []uint16{}
+		}
+		p.labelReferences[label] = append(p.labelReferences[label], uint16(len(p.bytecode)+1))
+
 		return []byte{opcode, 0x00, 0x00}, nil
 	}
 
@@ -381,7 +393,7 @@ func (p *Parser) parseDirectAddressInstruction() ([]byte, error) {
 
 	opcode, valid := opcodes[p.currentToken().Literal]
 	if !valid {
-		return nil, fmt.Errorf("invalid direct address instruction: %s, ", p.currentToken().Literal)
+		return nil, fmt.Errorf("invalid direct address instruction: %s", p.currentToken().Literal)
 	}
 	p.advanceToken()
 
@@ -394,7 +406,12 @@ func (p *Parser) parseDirectAddressInstruction() ([]byte, error) {
 	}
 
 	if p.currentToken().Type == lexer.LABEL {
-		p.labelReferences[p.currentToken().Literal] = uint16(len(p.bytecode) + 1)
+		label := p.currentToken().Literal
+		_, labelExists := p.labelReferences[label]
+		if !labelExists {
+			p.labelReferences[label] = []uint16{}
+		}
+		p.labelReferences[label] = append(p.labelReferences[label], uint16(len(p.bytecode)+1))
 		return []byte{opcode, 0x00, 0x00}, nil
 	}
 
@@ -545,9 +562,13 @@ func (p *Parser) parseJumpAndCallInstruction() ([]byte, error) {
 		}
 		return []byte{opcode, lowByte, highByte}, nil
 	}
-
 	if p.currentToken().Type == lexer.LABEL {
-		p.labelReferences[p.currentToken().Literal] = uint16(len(p.bytecode) + 1)
+		label := p.currentToken().Literal
+		_, labelExists := p.labelReferences[label]
+		if !labelExists {
+			p.labelReferences[label] = []uint16{}
+		}
+		p.labelReferences[label] = append(p.labelReferences[label], uint16(len(p.bytecode)+1))
 		return []byte{opcode, 0x00, 0x00}, nil
 	}
 

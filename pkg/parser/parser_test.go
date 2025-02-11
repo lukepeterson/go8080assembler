@@ -76,6 +76,34 @@ func TestParser_Parse(t *testing.T) {
 			wantBytecode: []byte{0x78, 0xC3, 0x05, 0x00, 0x4A},
 		},
 		{
+			name: "two references to the same label",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "JMP"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.MNEMONIC, Literal: "JMP"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xC3, 0x03, 0x00, 0xC3, 0x03, 0x00},
+		},
+		{
+			name: "three references to the same label",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "JMP"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.MNEMONIC, Literal: "JMP"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.MNEMONIC, Literal: "JMP"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0xC3, 0x03, 0x00, 0xC3, 0x03, 0x00, 0xC3, 0x03, 0x00},
+		},
+		{
 			name: "MOV A, B",
 			tokens: []lexer.Token{
 				{Type: lexer.MNEMONIC, Literal: "MOV"},
