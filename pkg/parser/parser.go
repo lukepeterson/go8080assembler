@@ -51,13 +51,15 @@ func (p *Parser) Parse() ([]byte, error) {
 			p.bytecode = append(p.bytecode, hexCode...)
 
 		case lexer.COMMENT:
-			// do nothing
+			// comments aren't assembled, so we simply skip the token
 
 		case lexer.LABEL:
-
-			// TODO: Check for duplicate labels and error if found
-			p.labelDefinitions[p.currentToken().Literal] = uint16(len(p.bytecode))
-
+			label := p.currentToken().Literal
+			_, labelExists := p.labelDefinitions[label]
+			if labelExists {
+				return nil, fmt.Errorf("duplicate label found: %s", label)
+			}
+			p.labelDefinitions[label] = uint16(len(p.bytecode))
 			p.advanceToken()
 
 		default:

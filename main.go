@@ -40,7 +40,6 @@ func main() {
 	START:      LXI H, MSG          ; Load the address of MSG into HL
 	            MVI C, 9            ; Load 9 (print string call) into register C
 	            CALL PRINT          ; Call the PRINT subroutine
-
 	            HLT                 ; Halt the program
 
 	PRINT:      MOV A, M            ; Load the character at HL into A

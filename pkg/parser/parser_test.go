@@ -104,6 +104,41 @@ func TestParser_Parse(t *testing.T) {
 			wantBytecode: []byte{0xC3, 0x03, 0x00, 0xC3, 0x03, 0x00, 0xC3, 0x03, 0x00},
 		},
 		{
+			name: "two definitions of the same label",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "JMP"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.MNEMONIC, Literal: "JMP"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+		{
+			name: "three definitions of the same label",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "JMP"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.MNEMONIC, Literal: "JMP"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.MNEMONIC, Literal: "JMP"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.LABEL, Literal: "START"},
+				{Type: lexer.COLON, Literal: ":"},
+				{Type: lexer.EOF},
+			},
+			wantErr: true,
+		},
+
+		{
 			name: "MOV A, B",
 			tokens: []lexer.Token{
 				{Type: lexer.MNEMONIC, Literal: "MOV"},
