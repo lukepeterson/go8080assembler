@@ -97,8 +97,8 @@ var instructionMap = map[string]parseFunc{
 	"MOV":  (*Parser).parseMOV,
 	"MVI":  (*Parser).parseMVI,
 	"LXI":  (*Parser).parseLXI,
-	"STAX": (*Parser).parseSTAX,
-	"LDAX": (*Parser).parseLDAX,
+	"STAX": (*Parser).parseSTAXandLDAX,
+	"LDAX": (*Parser).parseSTAXandLDAX,
 	"STA":  (*Parser).parseDirectAddressInstruction,
 	"LDA":  (*Parser).parseDirectAddressInstruction,
 	"SHLD": (*Parser).parseDirectAddressInstruction,
@@ -325,8 +325,16 @@ func (p *Parser) parseLXI() ([]byte, error) {
 	return nil, fmt.Errorf("expected address or label, got: %s", p.currentToken().Type)
 }
 
-// TODO: Combine STAX and LDAX instructions
-func (p *Parser) parseSTAX() ([]byte, error) {
+func (p *Parser) parseSTAXandLDAX() ([]byte, error) {
+	opcodes := map[string]byte{
+		"STAX": 0x02,
+		"LDAX": 0x0A,
+	}
+
+	opcode, valid := opcodes[p.currentToken().Literal]
+	if !valid {
+		return nil, fmt.Errorf("invalid STAX/LDAX instruction: %s", p.currentToken().Literal)
+	}
 	p.advanceToken()
 
 	if p.currentToken().Type != lexer.REGISTER {
@@ -344,29 +352,7 @@ func (p *Parser) parseSTAX() ([]byte, error) {
 		return nil, fmt.Errorf("invalid destination register for STAX: %s", dest)
 	}
 
-	opcode := byte(0x02) | (destRegister << 4)
-	return []byte{opcode}, nil
-}
-
-func (p *Parser) parseLDAX() ([]byte, error) {
-	p.advanceToken()
-
-	if p.currentToken().Type != lexer.REGISTER {
-		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
-	}
-	dest := p.currentToken().Literal
-	p.advanceToken()
-
-	registerMap := map[string]byte{
-		"B": 0x00, "D": 0x01,
-	}
-
-	destRegister, exists := registerMap[dest]
-	if !exists {
-		return nil, fmt.Errorf("invalid destination register for LDAX: %s", dest)
-	}
-
-	opcode := byte(0x0A) | (destRegister << 4)
+	opcode = opcode | (destRegister << 4)
 	return []byte{opcode}, nil
 }
 
