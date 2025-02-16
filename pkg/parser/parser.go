@@ -235,10 +235,6 @@ func (p *Parser) parseMOV() ([]byte, error) {
 	}
 	src := p.currentToken().Literal
 
-	return generateMOVHex(src, dest)
-}
-
-func generateMOVHex(src, dest string) ([]byte, error) {
 	srcRegister, exists := registerMap8[src]
 	if !exists {
 		return nil, fmt.Errorf("invalid source register for MOV: %s", src)
@@ -251,6 +247,7 @@ func generateMOVHex(src, dest string) ([]byte, error) {
 
 	opcode := byte(0x40) | (destRegister << 3) | srcRegister
 	return []byte{opcode}, nil
+
 }
 
 func (p *Parser) parseMVI() ([]byte, error) {
@@ -272,16 +269,12 @@ func (p *Parser) parseMVI() ([]byte, error) {
 	}
 	byteToStore := p.currentToken().Literal
 
-	return generateMVIHex(dest, byteToStore)
-}
-
-func generateMVIHex(dest string, data string) ([]byte, error) {
 	destRegister, exists := registerMap8[dest]
 	if !exists {
 		return nil, fmt.Errorf("invalid destination register for MOV: %s", dest)
 	}
 
-	_, lowByte, err := parseHex(data)
+	_, lowByte, err := parseHex(byteToStore)
 	if err != nil {
 		return nil, err
 	}
@@ -342,10 +335,6 @@ func (p *Parser) parseSTAX() ([]byte, error) {
 	dest := p.currentToken().Literal
 	p.advanceToken()
 
-	return generateSTAXHex(dest)
-}
-
-func generateSTAXHex(dest string) ([]byte, error) {
 	registerMap := map[string]byte{
 		"B": 0x00, "D": 0x01,
 	}
@@ -368,10 +357,6 @@ func (p *Parser) parseLDAX() ([]byte, error) {
 	dest := p.currentToken().Literal
 	p.advanceToken()
 
-	return generateLDAXHex(dest)
-}
-
-func generateLDAXHex(dest string) ([]byte, error) {
 	registerMap := map[string]byte{
 		"B": 0x00, "D": 0x01,
 	}
