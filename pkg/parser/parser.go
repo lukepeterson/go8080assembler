@@ -116,25 +116,25 @@ var instructionMap = map[string]parseFunc{
 	"DAD":  (*Parser).parseRegisterPairInstruction,
 
 	// JUMP AND CALL
-	"JMP":  (*Parser).parseJumpAndCallInstruction,
-	"JC":   (*Parser).parseJumpAndCallInstruction,
-	"JNC":  (*Parser).parseJumpAndCallInstruction,
-	"JZ":   (*Parser).parseJumpAndCallInstruction,
-	"JNZ":  (*Parser).parseJumpAndCallInstruction,
-	"JP":   (*Parser).parseJumpAndCallInstruction,
-	"JM":   (*Parser).parseJumpAndCallInstruction,
-	"JPE":  (*Parser).parseJumpAndCallInstruction,
-	"JPO":  (*Parser).parseJumpAndCallInstruction,
+	"JMP":  (*Parser).parseDirectAddressInstruction,
+	"JC":   (*Parser).parseDirectAddressInstruction,
+	"JNC":  (*Parser).parseDirectAddressInstruction,
+	"JZ":   (*Parser).parseDirectAddressInstruction,
+	"JNZ":  (*Parser).parseDirectAddressInstruction,
+	"JP":   (*Parser).parseDirectAddressInstruction,
+	"JM":   (*Parser).parseDirectAddressInstruction,
+	"JPE":  (*Parser).parseDirectAddressInstruction,
+	"JPO":  (*Parser).parseDirectAddressInstruction,
 	"PCHL": (*Parser).parseSingleByteInstruction,
-	"CALL": (*Parser).parseJumpAndCallInstruction,
-	"CC":   (*Parser).parseJumpAndCallInstruction,
-	"CNC":  (*Parser).parseJumpAndCallInstruction,
-	"CZ":   (*Parser).parseJumpAndCallInstruction,
-	"CNZ":  (*Parser).parseJumpAndCallInstruction,
-	"CP":   (*Parser).parseJumpAndCallInstruction,
-	"CM":   (*Parser).parseJumpAndCallInstruction,
-	"CPE":  (*Parser).parseJumpAndCallInstruction,
-	"CPO":  (*Parser).parseJumpAndCallInstruction,
+	"CALL": (*Parser).parseDirectAddressInstruction,
+	"CC":   (*Parser).parseDirectAddressInstruction,
+	"CNC":  (*Parser).parseDirectAddressInstruction,
+	"CZ":   (*Parser).parseDirectAddressInstruction,
+	"CNZ":  (*Parser).parseDirectAddressInstruction,
+	"CP":   (*Parser).parseDirectAddressInstruction,
+	"CM":   (*Parser).parseDirectAddressInstruction,
+	"CPE":  (*Parser).parseDirectAddressInstruction,
+	"CPO":  (*Parser).parseDirectAddressInstruction,
 
 	// RETURN
 	"RET": (*Parser).parseSingleByteInstruction,
@@ -362,6 +362,24 @@ func (p *Parser) parseDirectAddressInstruction() ([]byte, error) {
 		"LDA":  0x3A,
 		"SHLD": 0x22,
 		"LHLD": 0x2A,
+		"JMP":  0xC3,
+		"JC":   0xDA,
+		"JNC":  0xD2,
+		"JZ":   0xCA,
+		"JNZ":  0xC2,
+		"JP":   0xF2,
+		"JM":   0xFA,
+		"JPE":  0xEA,
+		"JPO":  0xE2,
+		"CALL": 0xCD,
+		"CC":   0xDC,
+		"CNC":  0xD4,
+		"CZ":   0xCC,
+		"CNZ":  0xC4,
+		"CP":   0xF4,
+		"CM":   0xFC,
+		"CPE":  0xEC,
+		"CPO":  0xE4,
 	}
 
 	opcode, valid := opcodes[p.currentToken().Literal]
@@ -498,54 +516,6 @@ func (p *Parser) parseRegisterPairInstruction() ([]byte, error) {
 
 	opcode = opcode | (destRegister << 4)
 	return []byte{opcode}, nil
-}
-
-func (p *Parser) parseJumpAndCallInstruction() ([]byte, error) {
-	opcodes := map[string]byte{
-		"JMP":  0xC3,
-		"JC":   0xDA,
-		"JNC":  0xD2,
-		"JZ":   0xCA,
-		"JNZ":  0xC2,
-		"JP":   0xF2,
-		"JM":   0xFA,
-		"JPE":  0xEA,
-		"JPO":  0xE2,
-		"CALL": 0xCD,
-		"CC":   0xDC,
-		"CNC":  0xD4,
-		"CZ":   0xCC,
-		"CNZ":  0xC4,
-		"CP":   0xF4,
-		"CM":   0xFC,
-		"CPE":  0xEC,
-		"CPO":  0xE4,
-	}
-
-	opcode, valid := opcodes[p.currentToken().Literal]
-	if !valid {
-		return nil, fmt.Errorf("invalid instruction: %s, ", p.currentToken().Literal)
-	}
-	p.advanceToken()
-
-	if p.currentToken().Type == lexer.NUMBER {
-		highByte, lowByte, err := parseHex(p.currentToken().Literal)
-		if err != nil {
-			return nil, err
-		}
-		return []byte{opcode, lowByte, highByte}, nil
-	}
-	if p.currentToken().Type == lexer.LABEL {
-		label := p.currentToken().Literal
-		_, labelExists := p.labelReferences[label]
-		if !labelExists {
-			p.labelReferences[label] = []uint16{}
-		}
-		p.labelReferences[label] = append(p.labelReferences[label], uint16(len(p.bytecode)+1))
-		return []byte{opcode, 0x00, 0x00}, nil
-	}
-
-	return nil, fmt.Errorf("expected address or label, got: %s", p.currentToken().Type)
 }
 
 func (p *Parser) parseRestartInstruction() ([]byte, error) {
