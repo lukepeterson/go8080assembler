@@ -20,6 +20,7 @@ It takes a newline separated string of Intel 8080 instructions, performs a lexic
 
 - Data support (eg, `DB`, `DW`)
 - Input from `STDIN`
+- Write some tests for `assembler.go`
 
 # Usage
 
