@@ -1,8 +1,6 @@
 package main
 
 import (
-	// import "github.com/lukepeterson/go8080assembler/assembler"
-
 	"fmt"
 
 	"github.com/lukepeterson/go8080assembler/pkg/lexer"
@@ -10,47 +8,13 @@ import (
 )
 
 func main() {
-	// code := `
-	// 	MVI A, 34h
-	// 	MOV B, C
-	// 	LDA, 1234h
-	// 	HLT
-	// `
-
-	// assembler := assembler.New()
-
-	// err := assembler.Assemble(code)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// for _, instruction := range assembler.ByteCode {
-	// 	fmt.Printf("%02X ", instruction)
-	// }
-
-	// input := `
-	// 	MVI A, 0x33
-	// 	TEST:	MOV B, C   ; The first comment
-	// 	LDA 1234h ; The second comment
-	// 	JMP TEST
-	// `
 
 	input := `
-	; Simple 8080 Assembly Program to Test Lexer
-	START:      LXI H, MSG          ; Load the address of MSG into HL
-	            MVI C, 9            ; Load 9 (print string call) into register C
-	            CALL PRINT          ; Call the PRINT subroutine
-	            HLT                 ; Halt the program
-
-	PRINT:      MOV A, M            ; Load the character at HL into A
-	            ORA A               ; Check if the character is null (A OR A sets Z flag if A is 0)
-	            RZ                  ; Return if zero (end of string)
-	            OUT 1               ; Output the character (assumes device 1 is stdout)
-	            INX H               ; Increment HL to point to the next character
-	            JMP PRINT           ; Repeat the process
-
-	MSG:        DB 'Hello, 8080!', 0 ; Message string (null-terminated)
-		`
+			MVI A, 0x33
+	START:	MOV B, C	; First comment
+			LDA 0x1234	; Second comment
+			JMP START
+	`
 
 	// Lex
 	l := lexer.New(input)
@@ -67,9 +31,9 @@ func main() {
 		fmt.Println(err)
 	}
 
+	// Print bytecode
 	for _, b := range bytecode {
 		fmt.Printf("%02X ", b)
 	}
 	fmt.Println()
-
 }
