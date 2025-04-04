@@ -558,7 +558,6 @@ func (p *Parser) parseRegister8Instruction() ([]byte, error) {
 		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
 	}
 	dest := p.currentToken().Literal
-	p.advanceToken()
 
 	destRegister, exists := registerMap8[dest]
 	if !exists {
