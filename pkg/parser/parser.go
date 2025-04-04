@@ -341,7 +341,6 @@ func (p *Parser) parseSTAXandLDAX() ([]byte, error) {
 		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
 	}
 	dest := p.currentToken().Literal
-	p.advanceToken()
 
 	registerMap := map[string]byte{
 		"B": 0x00, "D": 0x01,
