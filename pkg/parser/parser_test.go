@@ -1081,6 +1081,17 @@ func TestParser_Parse(t *testing.T) {
 			wantBytecode: []byte{0x31, 0x55, 0x44},
 		},
 		{
+			name: "INX B, INX B",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "INX"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.MNEMONIC, Literal: "INX"},
+				{Type: lexer.REGISTER, Literal: "B"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x03, 0x03},
+		},
+		{
 			name: "INX B",
 			tokens: []lexer.Token{
 				{Type: lexer.MNEMONIC, Literal: "INX"},

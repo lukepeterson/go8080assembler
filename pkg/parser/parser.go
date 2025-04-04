@@ -506,7 +506,6 @@ func (p *Parser) parseRegisterPairInstruction() ([]byte, error) {
 		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
 	}
 	dest := p.currentToken().Literal
-	p.advanceToken()
 
 	destRegister, exists := registerMap[dest]
 	if !exists {
