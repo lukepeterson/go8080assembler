@@ -477,7 +477,6 @@ func (p *Parser) parseSingleByteInstruction() ([]byte, error) {
 	if !valid {
 		return nil, fmt.Errorf("invalid instruction: %s, ", p.currentToken().Literal)
 	}
-	p.advanceToken()
 
 	return []byte{opcode}, nil
 }
