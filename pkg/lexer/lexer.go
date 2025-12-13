@@ -212,6 +212,8 @@ func (l *Lexer) NextToken() Token {
 		}
 		if isDigit(l.currentChar) {
 			literal := strings.ToUpper(l.readNumber())
+			// TODO: Why do we use toUpper?
+			// literal := l.readNumber()
 			token.Type = NUMBER
 			token.Literal = literal
 			return token

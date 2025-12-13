@@ -1053,10 +1053,10 @@ func TestParser_Parse(t *testing.T) {
 				{Type: lexer.LABEL, Literal: "MSG"},
 				{Type: lexer.COLON, Literal: ":"},
 				{Type: lexer.MNEMONIC, Literal: "DB"},
-				{Type: lexer.STRING, Literal: "Test"},
+				{Type: lexer.STRING, Literal: "foo"},
 				{Type: lexer.EOF},
 			},
-			wantBytecode: []byte{0x21, 0x03, 0x00, 0x54, 0x65, 0x73, 0x74},
+			wantBytecode: []byte{0x21, 0x03, 0x00, 0x66, 0x6F, 0x6F},
 		},
 		{
 			name: "LXI L, 0x4455 (invalid destination register)",
@@ -1346,14 +1346,25 @@ func TestParser_Parse(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "DB Hello",
+			name: "DB foo",
 			tokens: []lexer.Token{
 				{Type: lexer.MNEMONIC, Literal: "DB"},
-				{Type: lexer.STRING, Literal: "Hello"},
+				{Type: lexer.STRING, Literal: "foo"},
 				{Type: lexer.EOF},
 			},
-			wantBytecode: []byte{0x48, 0x65, 0x6C, 0x6C, 0x6F},
+			wantBytecode: []byte{0x66, 0x6F, 0x6F},
 		},
+		// {
+		// 	name: "Two DB statements",
+		// 	tokens: []lexer.Token{
+		// 		{Type: lexer.MNEMONIC, Literal: "DB"},
+		// 		{Type: lexer.STRING, Literal: "foo"},
+		// 		{Type: lexer.MNEMONIC, Literal: "DB"},
+		// 		{Type: lexer.STRING, Literal: "bar"},
+		// 		{Type: lexer.EOF},
+		// 	},
+		// 	wantBytecode: []byte{0x66, 0x6F, 0x6F, 0x62, 0x61, 0x72},
+		// },
 		{
 			name: "STA 0x4455",
 			tokens: []lexer.Token{
@@ -1371,10 +1382,10 @@ func TestParser_Parse(t *testing.T) {
 				{Type: lexer.LABEL, Literal: "MSG"},
 				{Type: lexer.COLON, Literal: ":"},
 				{Type: lexer.MNEMONIC, Literal: "DB"},
-				{Type: lexer.STRING, Literal: "Test"},
+				{Type: lexer.STRING, Literal: "foo"},
 				{Type: lexer.EOF},
 			},
-			wantBytecode: []byte{0x32, 0x03, 0x00, 0x54, 0x65, 0x73, 0x74},
+			wantBytecode: []byte{0x32, 0x03, 0x00, 0x66, 0x6F, 0x6F},
 		},
 		{
 			name: "LDA 0x4455",
@@ -1393,10 +1404,10 @@ func TestParser_Parse(t *testing.T) {
 				{Type: lexer.LABEL, Literal: "MSG"},
 				{Type: lexer.COLON, Literal: ":"},
 				{Type: lexer.MNEMONIC, Literal: "DB"},
-				{Type: lexer.STRING, Literal: "Test"},
+				{Type: lexer.STRING, Literal: "foo"},
 				{Type: lexer.EOF},
 			},
-			wantBytecode: []byte{0x3A, 0x03, 0x00, 0x54, 0x65, 0x73, 0x74},
+			wantBytecode: []byte{0x3A, 0x03, 0x00, 0x66, 0x6F, 0x6F},
 		},
 		{
 			name: "XCHG",
@@ -2993,11 +3004,13 @@ func TestParser_Parse(t *testing.T) {
 			got, err := p.Parse()
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Parser.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Parser.Parse() got error  = %v", err)
+				t.Errorf("Parser.Parse() want error = %v", tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.wantBytecode) {
-				t.Errorf("Parser.Parse() = %X, want %X", got, tt.wantBytecode)
+				t.Errorf("Parser.Parse() got  %v", got)
+				t.Errorf("Parser.Parse() want %v", tt.wantBytecode)
 			}
 		})
 	}
