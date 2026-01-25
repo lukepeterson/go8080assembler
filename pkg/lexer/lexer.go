@@ -205,15 +205,13 @@ func (l *Lexer) NextToken() Token {
 		token.Type = EOF
 	default:
 		if isLetter(l.currentChar) {
-			literal := strings.ToUpper(l.readToken())
+			literal := l.readToken()
 			token.Type = l.lookupToken(literal)
 			token.Literal = literal
 			return token
 		}
 		if isDigit(l.currentChar) {
 			literal := strings.ToUpper(l.readNumber())
-			// TODO: Why do we use toUpper?
-			// literal := l.readNumber()
 			token.Type = NUMBER
 			token.Literal = literal
 			return token
@@ -231,11 +229,11 @@ func (l *Lexer) skipWhitespace() {
 }
 
 func (l *Lexer) readToken() string {
-	position := l.position
+	start := l.position
 	for isLetter(l.currentChar) || isDigit(l.currentChar) {
 		l.readChar()
 	}
-	return l.input[position:l.position]
+	return strings.ToUpper(l.input[start:l.position])
 }
 
 func (l *Lexer) readNumber() string {

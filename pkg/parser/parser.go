@@ -41,7 +41,6 @@ func (p *Parser) currentToken() lexer.Token {
 
 func (p *Parser) Parse() ([]byte, error) {
 	for p.currentToken().Type != lexer.EOF {
-
 		switch p.currentToken().Type {
 		case lexer.MNEMONIC:
 			hexCode, err := p.parseInstruction()
@@ -51,7 +50,7 @@ func (p *Parser) Parse() ([]byte, error) {
 			p.bytecode = append(p.bytecode, hexCode...)
 
 		case lexer.COMMENT:
-			// comments aren't assembled, so we simply skip the token
+			p.advanceToken() // skip past comments as we don't assemble them
 
 		case lexer.LABEL:
 			label := p.currentToken().Literal
@@ -60,13 +59,12 @@ func (p *Parser) Parse() ([]byte, error) {
 				return nil, fmt.Errorf("duplicate label found: %s", label)
 			}
 			p.labelDefinitions[label] = uint16(len(p.bytecode))
-			p.advanceToken()
+			p.advanceToken() // move past the label
+			p.advanceToken() // move past the colon
 
 		default:
 			return nil, fmt.Errorf("unexpected token type \"%s\", literal: \"%s\"", p.currentToken().Type, p.currentToken().Literal)
 		}
-
-		p.advanceToken()
 	}
 
 	// TODO: Split this out into a second pass
@@ -234,6 +232,7 @@ func (p *Parser) parseMOV() ([]byte, error) {
 		return nil, fmt.Errorf("expected register, got: %s", p.currentToken().Literal)
 	}
 	src := p.currentToken().Literal
+	p.advanceToken()
 
 	srcRegister, exists := registerMap8[src]
 	if !exists {
@@ -247,7 +246,6 @@ func (p *Parser) parseMOV() ([]byte, error) {
 
 	opcode := byte(0x40) | (destRegister << 3) | srcRegister
 	return []byte{opcode}, nil
-
 }
 
 func (p *Parser) parseMVI() ([]byte, error) {
@@ -279,6 +277,7 @@ func (p *Parser) parseMVI() ([]byte, error) {
 		return nil, err
 	}
 
+	p.advanceToken()
 	opcode := byte(0x06) | (destRegister << 3)
 	return []byte{opcode, lowByte}, nil
 }
@@ -308,6 +307,7 @@ func (p *Parser) parseLXI() ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
+		p.advanceToken()
 		return []byte{opcode, lowByte, highByte}, nil
 	}
 
@@ -319,6 +319,7 @@ func (p *Parser) parseLXI() ([]byte, error) {
 		}
 		p.labelReferences[label] = append(p.labelReferences[label], uint16(len(p.bytecode)+1))
 
+		p.advanceToken()
 		return []byte{opcode, 0x00, 0x00}, nil
 	}
 
@@ -351,6 +352,7 @@ func (p *Parser) parseSTAXandLDAX() ([]byte, error) {
 		return nil, fmt.Errorf("invalid destination register for STAX: %s", dest)
 	}
 
+	p.advanceToken()
 	opcode = opcode | (destRegister << 4)
 	return []byte{opcode}, nil
 }
@@ -392,6 +394,7 @@ func (p *Parser) parseDirectAddressInstruction() ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
+		p.advanceToken()
 		return []byte{opcode, lowByte, highByte}, nil
 	}
 
@@ -402,6 +405,7 @@ func (p *Parser) parseDirectAddressInstruction() ([]byte, error) {
 			p.labelReferences[label] = []uint16{}
 		}
 		p.labelReferences[label] = append(p.labelReferences[label], uint16(len(p.bytecode)+1))
+		p.advanceToken()
 		return []byte{opcode, 0x00, 0x00}, nil
 	}
 
@@ -438,6 +442,7 @@ func (p *Parser) parseImmediateInstruction() ([]byte, error) {
 			return nil, fmt.Errorf("expected single byte of data, got: %s", p.currentToken().Literal)
 		}
 
+		p.advanceToken()
 		return []byte{opcode, lowByte}, nil
 	}
 
@@ -478,6 +483,7 @@ func (p *Parser) parseSingleByteInstruction() ([]byte, error) {
 		return nil, fmt.Errorf("invalid instruction: %s, ", p.currentToken().Literal)
 	}
 
+	p.advanceToken()
 	return []byte{opcode}, nil
 }
 
@@ -511,6 +517,7 @@ func (p *Parser) parseRegisterPairInstruction() ([]byte, error) {
 		return nil, fmt.Errorf("invalid destination register for %s: %s", p.currentToken().Literal, dest)
 	}
 
+	p.advanceToken()
 	opcode = opcode | (destRegister << 4)
 	return []byte{opcode}, nil
 }
@@ -527,6 +534,7 @@ func (p *Parser) parseRestartInstruction() ([]byte, error) {
 		return nil, fmt.Errorf("expected routine value between 0 and 7, got: %s", p.currentToken().Literal)
 	}
 
+	p.advanceToken()
 	opcode := byte(0xC7 + routine<<3)
 	return []byte{opcode}, nil
 }
@@ -568,13 +576,13 @@ func (p *Parser) parseRegister8Instruction() ([]byte, error) {
 		shiftAmount = 3
 	}
 
+	p.advanceToken()
 	opcode = opcode | (destRegister << shiftAmount)
 	return []byte{opcode}, nil
 }
 
 func (p *Parser) parseDB() ([]byte, error) {
 	p.advanceToken()
-
 	data := []byte{}
 
 	for p.currentToken().Type == lexer.NUMBER || p.currentToken().Type == lexer.STRING {
@@ -584,14 +592,10 @@ func (p *Parser) parseDB() ([]byte, error) {
 				return nil, fmt.Errorf("invalid byte value: %s", p.currentToken().Literal)
 			}
 			data = append(data, byte(value))
+			p.advanceToken()
 		} else if p.currentToken().Type == lexer.STRING {
-			// Convert string into bytes
+			// Convert the string into an array of bytes
 			data = append(data, []byte(p.currentToken().Literal)...)
-		}
-		p.advanceToken()
-
-		// Handle optional commas???
-		if p.currentToken().Type == lexer.COMMA {
 			p.advanceToken()
 		}
 	}

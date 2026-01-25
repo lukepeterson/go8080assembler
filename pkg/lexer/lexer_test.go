@@ -214,10 +214,66 @@ func TestLexer_Lex(t *testing.T) {
 			},
 		},
 		{
-			name:  "case sensitivity",
+			name:  "case sensitivity for mnemonics",
 			input: "mov",
 			want: []Token{
 				{Type: MNEMONIC, Literal: "MOV"},
+				{Type: EOF},
+			},
+		},
+		{
+			name: "case sensitivity for 1-byte numeric literals",
+			input: `
+				MVI A, 0x3A
+				MVI B, 0X3B
+				MVI C, 3Ch
+				MVI D, 3DH
+			`,
+			want: []Token{
+				{Type: MNEMONIC, Literal: "MVI"},
+				{Type: REGISTER, Literal: "A"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "0X3A"},
+				{Type: MNEMONIC, Literal: "MVI"},
+				{Type: REGISTER, Literal: "B"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "0X3B"},
+				{Type: MNEMONIC, Literal: "MVI"},
+				{Type: REGISTER, Literal: "C"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "3CH"},
+				{Type: MNEMONIC, Literal: "MVI"},
+				{Type: REGISTER, Literal: "D"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "3DH"},
+				{Type: EOF},
+			},
+		},
+		{
+			name: "case sensitivity for 2-byte numeric literals",
+			input: `
+				MVI A, 0x3A3B
+				MVI B, 0X3C3D
+				MVI C, 4A4Bh
+				MVI D, 4C4DH
+			`,
+			want: []Token{
+				{Type: MNEMONIC, Literal: "MVI"},
+				{Type: REGISTER, Literal: "A"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "0X3A3B"},
+				{Type: MNEMONIC, Literal: "MVI"},
+				{Type: REGISTER, Literal: "B"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "0X3C3D"},
+				{Type: MNEMONIC, Literal: "MVI"},
+				{Type: REGISTER, Literal: "C"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "4A4BH"},
+				{Type: MNEMONIC, Literal: "MVI"},
+				{Type: REGISTER, Literal: "D"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "4C4DH"},
 				{Type: EOF},
 			},
 		},
@@ -291,47 +347,61 @@ func TestLexer_Lex(t *testing.T) {
 				{Type: EOF},
 			},
 		},
-		// {
-		// 	name:  "DB with string",
-		// 	input: "DB 'mystring', 0x04, 0x05, '$'",
-		// 	want: []Token{
-		// 		{Type: MNEMONIC, Literal: "DB"},
-		// 		{Type: STRING, Literal: "mystring"},
-		// 		{Type: COMMA, Literal: ","},
-		// 		{Type: NUMBER, Literal: "0x04"},
-		// 		{Type: COMMA, Literal: ","},
-		// 		{Type: NUMBER, Literal: "0x05"},
-		// 		{Type: COMMA, Literal: ","},
-		// 		{Type: STRING, Literal: "$"},
-		// 		{Type: EOF},
-		// 	},
-		// },
-		// {
-		// 	name: "multiple DB statements",
-		// 	input: `
-		// 	 DB 'foo', 0x04, 0x05, '$'
-		// 	 DB 'bar', 0x06, 0x07, '$'
-		// 	`,
-		// 	want: []Token{
-		// 		{Type: MNEMONIC, Literal: "DB"},
-		// 		{Type: STRING, Literal: "foo"},
-		// 		{Type: COMMA, Literal: ","},
-		// 		{Type: NUMBER, Literal: "0x04"},
-		// 		{Type: COMMA, Literal: ","},
-		// 		{Type: NUMBER, Literal: "0x05"},
-		// 		{Type: COMMA, Literal: ","},
-		// 		{Type: STRING, Literal: "$"},
-		// 		{Type: MNEMONIC, Literal: "DB"},
-		// 		{Type: STRING, Literal: "bar"},
-		// 		{Type: COMMA, Literal: ","},
-		// 		{Type: NUMBER, Literal: "0x06"},
-		// 		{Type: COMMA, Literal: ","},
-		// 		{Type: NUMBER, Literal: "0x07"},
-		// 		{Type: COMMA, Literal: ","},
-		// 		{Type: STRING, Literal: "$"},
-		// 		{Type: EOF},
-		// 	},
-		// },
+		{
+			name:  "DB with string",
+			input: "DB 'foo', 0x04, 0x05, 'bar'",
+			want: []Token{
+				{Type: MNEMONIC, Literal: "DB"},
+				{Type: STRING, Literal: "foo"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "0X04"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "0X05"},
+				{Type: COMMA, Literal: ","},
+				{Type: STRING, Literal: "bar"},
+				{Type: EOF},
+			},
+		},
+		{
+			name: "multiple DB statements",
+			input: `
+				DB 'foo', 0x04, 0x05, 'bar'
+				DB 'bar', 0x06, 0x07, 'foo'
+			`,
+			want: []Token{
+				{Type: MNEMONIC, Literal: "DB"},
+				{Type: STRING, Literal: "foo"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "0X04"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "0X05"},
+				{Type: COMMA, Literal: ","},
+				{Type: STRING, Literal: "bar"},
+				{Type: MNEMONIC, Literal: "DB"},
+				{Type: STRING, Literal: "bar"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "0X06"},
+				{Type: COMMA, Literal: ","},
+				{Type: NUMBER, Literal: "0X07"},
+				{Type: COMMA, Literal: ","},
+				{Type: STRING, Literal: "foo"},
+				{Type: EOF},
+			},
+		},
+		{
+			name: "multiple DB statements",
+			input: `
+				DB 'foo'
+				DB 'bar'
+			`,
+			want: []Token{
+				{Type: MNEMONIC, Literal: "DB"},
+				{Type: STRING, Literal: "foo"},
+				{Type: MNEMONIC, Literal: "DB"},
+				{Type: STRING, Literal: "bar"},
+				{Type: EOF},
+			},
+		},
 	}
 
 	for _, tt := range tests {

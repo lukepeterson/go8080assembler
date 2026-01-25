@@ -1346,7 +1346,7 @@ func TestParser_Parse(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "DB foo",
+			name: "One DB statement",
 			tokens: []lexer.Token{
 				{Type: lexer.MNEMONIC, Literal: "DB"},
 				{Type: lexer.STRING, Literal: "foo"},
@@ -1354,17 +1354,17 @@ func TestParser_Parse(t *testing.T) {
 			},
 			wantBytecode: []byte{0x66, 0x6F, 0x6F},
 		},
-		// {
-		// 	name: "Two DB statements",
-		// 	tokens: []lexer.Token{
-		// 		{Type: lexer.MNEMONIC, Literal: "DB"},
-		// 		{Type: lexer.STRING, Literal: "foo"},
-		// 		{Type: lexer.MNEMONIC, Literal: "DB"},
-		// 		{Type: lexer.STRING, Literal: "bar"},
-		// 		{Type: lexer.EOF},
-		// 	},
-		// 	wantBytecode: []byte{0x66, 0x6F, 0x6F, 0x62, 0x61, 0x72},
-		// },
+		{
+			name: "Two DB statements",
+			tokens: []lexer.Token{
+				{Type: lexer.MNEMONIC, Literal: "DB"},
+				{Type: lexer.STRING, Literal: "foo"},
+				{Type: lexer.MNEMONIC, Literal: "DB"},
+				{Type: lexer.STRING, Literal: "bar"},
+				{Type: lexer.EOF},
+			},
+			wantBytecode: []byte{0x66, 0x6F, 0x6F, 0x62, 0x61, 0x72},
+		},
 		{
 			name: "STA 0x4455",
 			tokens: []lexer.Token{
